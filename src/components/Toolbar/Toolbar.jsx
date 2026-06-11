@@ -7,7 +7,8 @@ import {
 } from '../../store/editorSlice';
 import SizeModal from '../modals/SizeModal';
 import ExportModal from '../modals/ExportModal';
-import { Undo2, Redo2, Lock, Unlock, Grid3x3, Download } from 'lucide-react';
+import InfoModal from '../modals/InfoModal';
+import { Undo2, Redo2, Lock, Unlock, Grid3x3, Download, Info } from 'lucide-react';
 
 export default function Toolbar({ stageRef }) {
   const dispatch = useDispatch();
@@ -17,6 +18,7 @@ export default function Toolbar({ stageRef }) {
   const keepRatio = useSelector(selectKeepRatio);
   const [showSize, setShowSize] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   function handleNew() {
     if (confirm('Створити новий проект? Поточний буде втрачено.')) {
@@ -54,9 +56,11 @@ export default function Toolbar({ stageRef }) {
           <div className="toolbar-divider" />
           <button className="btn btn-primary" onClick={() => setShowExport(true)}><Download size={14} /> Експорт</button>
         </div>
+        <button className="btn btn-icon btn-ghost toolbar-info-btn" title="Довідка" onClick={() => setShowInfo(true)}><Info size={18} /></button>
       </header>
       {showSize && <SizeModal onClose={() => setShowSize(false)} />}
       {showExport && <ExportModal stageRef={stageRef} onClose={() => setShowExport(false)} />}
+      {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
     </>
   );
 }
