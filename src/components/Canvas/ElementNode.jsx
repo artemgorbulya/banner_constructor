@@ -1,7 +1,7 @@
-import { useRef, useEffect, useLayoutEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Image as KonvaImage, Text as KonvaText } from 'react-konva';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateElement, updateElementWithHistory, setSelectedId, selectSelectedId } from '../../store/editorSlice';
+import { useDispatch } from 'react-redux';
+import { updateElement, updateElementWithHistory, setSelectedId } from '../../store/editorSlice';
 import { useSnapGrid } from '../../hooks/useSnapGrid';
 
 function ImageNode({ el, onSelect }) {

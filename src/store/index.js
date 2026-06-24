@@ -28,7 +28,7 @@ function loadSavedState() {
   }
 }
 
-const savedEditorState = loadSavedState();
+const savedEditorState = typeof window !== 'undefined' ? loadSavedState() : undefined;
 
 export const store = configureStore({
   reducer: {

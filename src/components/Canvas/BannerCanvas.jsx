@@ -3,7 +3,7 @@ import { Stage, Layer, Rect, Image as KonvaImage, Group } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectCanvasSize, selectBackground, selectBackgroundImage, selectElements,
-  selectSelectedId, setSelectedId, updateBackgroundImage,
+  setSelectedId, updateBackgroundImage,
 } from '../../store/editorSlice';
 import ElementNode from './ElementNode';
 import CanvasTransformer from './CanvasTransformer';
