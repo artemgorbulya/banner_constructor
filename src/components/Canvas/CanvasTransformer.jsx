@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { Transformer } from 'react-konva';
 import { useSelector } from 'react-redux';
 import { selectSelectedId, selectKeepRatio, selectSelectedElementType } from '../../store/editorSlice';
