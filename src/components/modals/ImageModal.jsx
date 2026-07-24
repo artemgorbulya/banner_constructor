@@ -102,15 +102,15 @@ export default function ImageModal({ mode, onClose }) {
           <button className="btn btn-icon" onClick={onClose}><X size={16} /></button>
         </div>
 
-        {/* Main tabs: Upload / URL / Library */}
+        {/* Main tabs: Upload / URL / Library / Remove BG */}
         <div className="modal-tabs">
-          {['upload', 'url', 'library'].map(t => (
+          {['upload', 'url', 'library', 'removebg'].map(t => (
             <button
               key={t}
               className={`tab-btn ${tab === t ? 'tab-active' : ''}`}
               onClick={() => setTab(t)}
             >
-              {{ upload: 'Завантажити', url: 'URL', library: 'Бібліотека' }[t]}
+              {{ upload: 'Завантажити', url: 'URL', library: 'Бібліотека', removebg: 'Вирізання фону' }[t]}
             </button>
           ))}
         </div>
@@ -144,6 +144,32 @@ export default function ImageModal({ mode, onClose }) {
               />
               {urlError && <p className="error-msg">{urlError}</p>}
               <button className="btn btn-primary" onClick={handleUrl}>Завантажити</button>
+            </div>
+          )}
+
+          {!loading && tab === 'removebg' && (
+            <div className="removebg-stub">
+              <div className="removebg-icon">✂️</div>
+              <h3 className="removebg-title">Вирізання фону</h3>
+              <p className="removebg-desc">
+                Скористайтесь безкоштовним сервісом <strong>remove.bg</strong> — він автоматично видаляє фон із зображення за допомогою ШІ:
+              </p>
+              <ol className="removebg-steps">
+                <li>Перейдіть на сервіс за посиланням нижче</li>
+                <li>Завантажте своє зображення (фото, логотип тощо)</li>
+                <li>ШІ автоматично вирізає фон за кілька секунд</li>
+                <li>Завантажте результат у форматі PNG із прозорістю</li>
+                <li>Поверніться сюди і завантажте отриманий файл через вкладку «Завантажити»</li>
+              </ol>
+              <a
+                href="https://www.remove.bg/uk/upload"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary removebg-link"
+              >
+                Відкрити remove.bg →
+              </a>
+              <div className="removebg-wip">🚧 Власний сервіс у розробці</div>
             </div>
           )}
 
