@@ -87,9 +87,11 @@ export default function ImageModal({ mode, onClose }) {
   }
 
   function handleUrl() {
-    if (!url.trim()) return;
+    const raw = url.trim();
+    if (!raw) return;
     setUrlError('');
-    placeImage(url.trim());
+    const src = raw.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(raw)}` : raw;
+    placeImage(src);
   }
 
   return (

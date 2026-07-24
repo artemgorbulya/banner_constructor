@@ -8,8 +8,7 @@ import {
 import SizeModal from '../modals/SizeModal';
 import ExportModal from '../modals/ExportModal';
 import InfoModal from '../modals/InfoModal';
-import AiGenerateModal from '../modals/AiGenerateModal';
-import { Undo2, Redo2, Lock, Unlock, Grid3x3, Download, Info, Sparkles } from 'lucide-react';
+import { Undo2, Redo2, Lock, Unlock, Grid3x3, Download, Info } from 'lucide-react';
 
 export default function Toolbar({ stageRef }) {
   const dispatch = useDispatch();
@@ -20,7 +19,6 @@ export default function Toolbar({ stageRef }) {
   const [showSize, setShowSize] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [showAi, setShowAi] = useState(false);
 
   function handleNew() {
     if (confirm('Створити новий проект? Поточний буде втрачено.')) {
@@ -37,7 +35,6 @@ export default function Toolbar({ stageRef }) {
         <div className="toolbar-actions">
           <button className="btn btn-ghost" onClick={handleNew}>Новий</button>
           <button className="btn btn-ghost" onClick={() => setShowSize(true)}>Розмір</button>
-          <button className="btn btn-ghost" onClick={() => setShowAi(true)}><Sparkles size={14} /> AI Фон</button>
           <div className="toolbar-divider" />
           <button className="btn btn-icon" title="Скасувати (Ctrl+Z)" disabled={!canUndo} onClick={() => dispatch(undoHistory())}><Undo2 size={16} /></button>
           <button className="btn btn-icon" title="Повторити (Ctrl+Shift+Z)" disabled={!canRedo} onClick={() => dispatch(redoHistory())}><Redo2 size={16} /></button>
@@ -64,7 +61,6 @@ export default function Toolbar({ stageRef }) {
       {showSize && <SizeModal onClose={() => setShowSize(false)} />}
       {showExport && <ExportModal stageRef={stageRef} onClose={() => setShowExport(false)} />}
       {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
-      {showAi && <AiGenerateModal onClose={() => setShowAi(false)} />}
     </>
   );
 }
