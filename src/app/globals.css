@@ -132,6 +132,31 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
 .range-input { width: 100%; accent-color: var(--accent); cursor: pointer; }
 .range-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); }
 
+/* ─── Element size controls ──────────────────────────────── */
+.el-size-row { display: flex; gap: 8px; }
+.el-size-field { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+.el-size-label { font-size: 11px; font-weight: 700; color: var(--text-muted); width: 14px; flex-shrink: 0; }
+.el-size-input { flex: 1; min-width: 0; }
+.el-size-unit { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+.el-size-hint { font-size: 10px; color: var(--text-muted); margin-top: 6px; opacity: .7; }
+.el-size-apply { width: 100%; margin-top: 8px; }
+
+/* ─── Size tooltip overlay ───────────────────────────────── */
+.size-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 4px;
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translate(4px, -100%);
+  z-index: 10;
+  letter-spacing: 0.3px;
+}
+
 /* ─── Canvas workspace ───────────────────────────────────── */
 .canvas-workspace {
   flex: 1; overflow: auto; background: var(--workspace);

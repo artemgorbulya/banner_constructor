@@ -10,6 +10,7 @@ import BannerCanvas from './components/Canvas/BannerCanvas';
 import LayersPanel from './components/panels/LayersPanel';
 import AddPanel from './components/panels/AddPanel';
 import TextControls from './components/panels/TextControls';
+import ElementSizeControls from './components/panels/ElementSizeControls';
 
 function EditorInner() {
   const stageRef = useRef(null);
@@ -24,6 +25,7 @@ function EditorInner() {
         <BannerCanvas stageRef={stageRef} />
         <div className="right-panel">
           <AddPanel />
+          <ElementSizeControls />
           <TextControls />
         </div>
       </div>
