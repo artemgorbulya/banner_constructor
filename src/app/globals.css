@@ -49,7 +49,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
   gap: 8px;
   flex-shrink: 0;
 }
-.toolbar-brand { font-weight: 700; font-size: 14px; color: var(--accent); margin-right: 8px; }
+.toolbar-brand { display: flex; align-items: center; margin-right: 8px; }
+.toolbar-logo { height: 36px; width: auto; display: block; }
 .toolbar-actions { display: flex; align-items: center; gap: 6px; }
 .toolbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
 
@@ -82,7 +83,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
   display: flex;
   flex-direction: column;
 }
-.right-panel { border-right: none; border-left: 1px solid var(--border); }
+.right-panel { border-right: none; border-left: 1px solid var(--border); overflow: hidden; }
+.right-panel .side-panel { flex-shrink: 0; overflow: visible; }
 
 .panel-section { padding: 12px; border-bottom: 1px solid var(--border); }
 .panel-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--text-muted); margin-bottom: 10px; padding: 12px 12px 0; }
@@ -116,7 +118,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
 .add-btn-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
 
 /* ─── Text controls ──────────────────────────────────────── */
-.text-controls { padding: 12px; border-top: 1px solid var(--border); }
+.text-controls { padding: 12px; border-top: 1px solid var(--border); flex: 1; overflow-y: auto; min-height: 0; }
 .control-label { display: block; font-size: 11px; color: var(--text-muted); margin: 10px 0 4px; }
 .font-loading-hint { color: var(--accent); opacity: .8; }
 .text-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 5px 8px; font-size: 12px; }

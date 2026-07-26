@@ -31,7 +31,9 @@ export default function Toolbar({ stageRef }) {
   return (
     <>
       <header className="toolbar">
-        <div className="toolbar-brand">Banner Constructor</div>
+        <div className="toolbar-brand">
+          <img src="/logo.png" alt="RozBanCon" className="toolbar-logo" />
+        </div>
         <div className="toolbar-actions">
           <button className="btn btn-ghost" onClick={handleNew}>Новий</button>
           <button className="btn btn-ghost" onClick={() => setShowSize(true)}>Розмір</button>
