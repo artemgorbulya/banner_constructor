@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addElement, setBackgroundImage, selectCanvasSize } from '../../store/editorSlice';
 import { LIBRARY } from '../../lib/library';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Scissors, RotateCcw } from 'lucide-react';
 
 function loadImageSize(src) {
   return new Promise((resolve, reject) => {
@@ -12,6 +12,239 @@ function loadImageSize(src) {
     img.onerror = reject;
     img.src = src;
   });
+}
+
+function RemoveBgTab({ onPlace }) {
+  const [apiKey, setApiKey] = useState(() => {
+    try { return localStorage.getItem('removebg_api_key') ?? ''; } catch { return ''; }
+  });
+  const [inputMode, setInputMode] = useState('file');
+  const [url, setUrl] = useState('');
+  const [sourceBase64, setSourceBase64] = useState(null);
+  const [result, setResult] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState('');
+  const [dragging, setDragging] = useState(false);
+  const fileRef = useRef(null);
+
+  function saveKey(k) {
+    setApiKey(k);
+    try { localStorage.setItem('removebg_api_key', k); } catch {/* ignore */}
+  }
+
+  function readFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => { setSourceBase64(ev.target.result); setResult(null); setError(''); };
+    reader.readAsDataURL(file);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setDragging(false);
+    readFile(e.dataTransfer.files?.[0]);
+  }
+
+  async function process() {
+    if (!apiKey.trim()) { setError('Введіть API ключ'); return; }
+    if (inputMode === 'file' && !sourceBase64) { setError('Виберіть зображення'); return; }
+    if (inputMode === 'url' && !url.trim()) { setError('Введіть URL зображення'); return; }
+
+    setProcessing(true);
+    setError('');
+    setResult(null);
+
+    try {
+      const body = inputMode === 'file'
+        ? { imageBase64: sourceBase64, apiKey: apiKey.trim() }
+        : { imageUrl: url.trim(), apiKey: apiKey.trim() };
+
+      const res = await fetch('/api/remove-bg', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Помилка обробки');
+      setResult(data.image);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  function reset() {
+    setResult(null);
+    setSourceBase64(null);
+    setUrl('');
+    setError('');
+  }
+
+  const hasKey = apiKey.trim().length > 0;
+
+  return (
+    <div className="removebg-panel">
+      {!hasKey ? (
+        <div className="removebg-stub">
+          <div className="removebg-icon">✂️</div>
+          <h3 className="removebg-title">Вирізання фону</h3>
+          <p className="removebg-desc">
+            Скористайтесь безкоштовним сервісом <strong>remove.bg</strong> — він автоматично видаляє фон із зображення за допомогою ШІ:
+          </p>
+          <ol className="removebg-steps">
+            <li>Отримайте безкоштовний API ключ на remove.bg</li>
+            <li>Введіть його в поле нижче</li>
+            <li>Завантажте зображення або вкажіть URL</li>
+            <li>Натисніть «Видалити фон» — PNG із прозорістю одразу додасться на банер</li>
+          </ol>
+          <div className="removebg-stub-btns">
+            <a
+              href="https://www.remove.bg/uk/upload"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary removebg-link"
+            >
+              Відкрити remove.bg →
+            </a>
+            <a
+              href="https://www.remove.bg/dashboard#api-key"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost removebg-link"
+            >
+              Отримати API ключ →
+            </a>
+          </div>
+          <div className="removebg-key-row-inline">
+            <input
+              type="password"
+              placeholder="Вже маєте ключ? Введіть тут"
+              value={apiKey}
+              onChange={e => saveKey(e.target.value)}
+              className="text-input removebg-key-input-inline"
+            />
+          </div>
+          <p className="removebg-quota-hint">Безкоштовно: 50 викликів на місяць</p>
+        </div>
+      ) : (
+        <>
+          <div className="removebg-key-row">
+            <label className="removebg-key-label">API ключ remove.bg</label>
+            <div className="removebg-key-inputs">
+              <input
+                type="password"
+                placeholder="Введіть ваш API ключ"
+                value={apiKey}
+                onChange={e => saveKey(e.target.value)}
+                className="text-input removebg-key-input"
+              />
+              <a
+                href="https://www.remove.bg/dashboard#api-key"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost removebg-key-link"
+              >
+                Отримати ключ
+              </a>
+            </div>
+            <p className="removebg-quota-hint">Безкоштовно: 50 викликів на місяць</p>
+          </div>
+
+          {!result && (
+            <>
+              <div className="removebg-mode-tabs">
+                {['file', 'url'].map(m => (
+                  <button
+                    key={m}
+                    className={`tab-btn ${inputMode === m ? 'tab-active' : ''}`}
+                    onClick={() => { setInputMode(m); setError(''); }}
+                  >
+                    {m === 'file' ? 'Файл' : 'URL'}
+                  </button>
+                ))}
+              </div>
+
+              {inputMode === 'file' && (
+                <div
+                  className={`upload-area upload-area-sm ${dragging ? 'upload-area-drag' : ''} ${sourceBase64 ? 'upload-area-filled' : ''}`}
+                  onClick={() => !sourceBase64 && fileRef.current?.click()}
+                  onDragOver={e => { e.preventDefault(); setDragging(true); }}
+                  onDragEnter={e => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={handleDrop}
+                >
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={e => readFile(e.target.files?.[0])}
+                  />
+                  {sourceBase64 ? (
+                    <div className="removebg-source-preview">
+                      <img src={sourceBase64} className="removebg-preview-img" alt="джерело" />
+                      <button
+                        className="btn btn-icon removebg-clear-btn"
+                        onClick={e => { e.stopPropagation(); setSourceBase64(null); setError(''); }}
+                        title="Очистити"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={28} strokeWidth={1.5} />
+                      <p>Перетягніть або виберіть файл</p>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {inputMode === 'url' && (
+                <input
+                  type="url"
+                  placeholder="https://example.com/photo.jpg"
+                  value={url}
+                  onChange={e => { setUrl(e.target.value); setError(''); }}
+                  className="text-input removebg-url-input"
+                />
+              )}
+
+              {error && <p className="error-msg">{error}</p>}
+
+              <button
+                className="btn btn-primary removebg-process-btn"
+                onClick={process}
+                disabled={processing}
+              >
+                {processing
+                  ? <><span className="removebg-spinner" />Обробка…</>
+                  : <><Scissors size={14} />Видалити фон</>
+                }
+              </button>
+            </>
+          )}
+
+      {result && (
+        <div className="removebg-result">
+          <div className="removebg-checkered">
+            <img src={result} className="removebg-result-img" alt="результат" />
+          </div>
+          <div className="removebg-result-actions">
+            <button className="btn btn-ghost" onClick={reset}>
+              <RotateCcw size={14} /> Спробувати інше
+            </button>
+            <button className="btn btn-primary" onClick={() => onPlace(result)}>
+              Додати на банер
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+    )}
+    </div>
+  );
 }
 
 export default function ImageModal({ mode, onClose }) {
@@ -148,29 +381,7 @@ export default function ImageModal({ mode, onClose }) {
           )}
 
           {!loading && tab === 'removebg' && (
-            <div className="removebg-stub">
-              <div className="removebg-icon">✂️</div>
-              <h3 className="removebg-title">Вирізання фону</h3>
-              <p className="removebg-desc">
-                Скористайтесь безкоштовним сервісом <strong>remove.bg</strong> — він автоматично видаляє фон із зображення за допомогою ШІ:
-              </p>
-              <ol className="removebg-steps">
-                <li>Перейдіть на сервіс за посиланням нижче</li>
-                <li>Завантажте своє зображення (фото, логотип тощо)</li>
-                <li>ШІ автоматично вирізає фон за кілька секунд</li>
-                <li>Завантажте результат у форматі PNG із прозорістю</li>
-                <li>Поверніться сюди і завантажте отриманий файл через вкладку «Завантажити»</li>
-              </ol>
-              <a
-                href="https://www.remove.bg/uk/upload"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary removebg-link"
-              >
-                Відкрити remove.bg →
-              </a>
-              <div className="removebg-wip">🚧 Власний сервіс у розробці</div>
-            </div>
+            <RemoveBgTab onPlace={placeImage} />
           )}
 
           {!loading && tab === 'library' && (
