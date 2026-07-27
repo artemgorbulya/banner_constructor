@@ -152,79 +152,79 @@ function RemoveBgTab({ onPlace }) {
           </div>
 
           {!result && (
-        <>
-          <div className="removebg-mode-tabs">
-            {['file', 'url'].map(m => (
-              <button
-                key={m}
-                className={`tab-btn ${inputMode === m ? 'tab-active' : ''}`}
-                onClick={() => { setInputMode(m); setError(''); }}
-              >
-                {m === 'file' ? 'Файл' : 'URL'}
-              </button>
-            ))}
-          </div>
-
-          {inputMode === 'file' && (
-            <div
-              className={`upload-area upload-area-sm ${dragging ? 'upload-area-drag' : ''} ${sourceBase64 ? 'upload-area-filled' : ''}`}
-              onClick={() => !sourceBase64 && fileRef.current?.click()}
-              onDragOver={e => { e.preventDefault(); setDragging(true); }}
-              onDragEnter={e => { e.preventDefault(); setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={handleDrop}
-            >
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={e => readFile(e.target.files?.[0])}
-              />
-              {sourceBase64 ? (
-                <div className="removebg-source-preview">
-                  <img src={sourceBase64} className="removebg-preview-img" alt="джерело" />
+            <>
+              <div className="removebg-mode-tabs">
+                {['file', 'url'].map(m => (
                   <button
-                    className="btn btn-icon removebg-clear-btn"
-                    onClick={e => { e.stopPropagation(); setSourceBase64(null); setError(''); }}
-                    title="Очистити"
+                    key={m}
+                    className={`tab-btn ${inputMode === m ? 'tab-active' : ''}`}
+                    onClick={() => { setInputMode(m); setError(''); }}
                   >
-                    <X size={14} />
+                    {m === 'file' ? 'Файл' : 'URL'}
                   </button>
+                ))}
+              </div>
+
+              {inputMode === 'file' && (
+                <div
+                  className={`upload-area upload-area-sm ${dragging ? 'upload-area-drag' : ''} ${sourceBase64 ? 'upload-area-filled' : ''}`}
+                  onClick={() => !sourceBase64 && fileRef.current?.click()}
+                  onDragOver={e => { e.preventDefault(); setDragging(true); }}
+                  onDragEnter={e => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={handleDrop}
+                >
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={e => readFile(e.target.files?.[0])}
+                  />
+                  {sourceBase64 ? (
+                    <div className="removebg-source-preview">
+                      <img src={sourceBase64} className="removebg-preview-img" alt="джерело" />
+                      <button
+                        className="btn btn-icon removebg-clear-btn"
+                        onClick={e => { e.stopPropagation(); setSourceBase64(null); setError(''); }}
+                        title="Очистити"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={28} strokeWidth={1.5} />
+                      <p>Перетягніть або виберіть файл</p>
+                    </>
+                  )}
                 </div>
-              ) : (
-                <>
-                  <Upload size={28} strokeWidth={1.5} />
-                  <p>Перетягніть або виберіть файл</p>
-                </>
               )}
-            </div>
+
+              {inputMode === 'url' && (
+                <input
+                  type="url"
+                  placeholder="https://example.com/photo.jpg"
+                  value={url}
+                  onChange={e => { setUrl(e.target.value); setError(''); }}
+                  className="text-input removebg-url-input"
+                />
+              )}
+
+              {error && <p className="error-msg">{error}</p>}
+
+              <button
+                className="btn btn-primary removebg-process-btn"
+                onClick={process}
+                disabled={processing}
+              >
+                {processing
+                  ? <><span className="removebg-spinner" />Обробка…</>
+                  : <><Scissors size={14} />Видалити фон</>
+                }
+              </button>
+            </>
           )}
-
-          {inputMode === 'url' && (
-            <input
-              type="url"
-              placeholder="https://example.com/photo.jpg"
-              value={url}
-              onChange={e => { setUrl(e.target.value); setError(''); }}
-              className="text-input removebg-url-input"
-            />
-          )}
-
-          {error && <p className="error-msg">{error}</p>}
-
-          <button
-            className="btn btn-primary removebg-process-btn"
-            onClick={process}
-            disabled={processing}
-          >
-            {processing
-              ? <><span className="removebg-spinner" />Обробка…</>
-              : <><Scissors size={14} />Видалити фон</>
-            }
-          </button>
-        </>
-      )}
 
       {result && (
         <div className="removebg-result">

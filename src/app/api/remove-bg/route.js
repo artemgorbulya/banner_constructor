@@ -17,7 +17,9 @@ export async function POST(request) {
     if (imageBase64) {
       const [header, b64data] = imageBase64.split(',');
       const mime = header.match(/:(.*?);/)?.[1] ?? 'image/png';
-      const bytes = Buffer.from(b64data, 'base64');
+      const binary = atob(b64data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       const blob = new Blob([bytes], { type: mime });
       form.append('image_file', blob, 'image.png');
     } else {
@@ -45,7 +47,13 @@ export async function POST(request) {
     }
 
     const buffer = await res.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    const chunk = 8192;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+    }
+    const base64 = btoa(binary);
     return NextResponse.json({ image: `data:image/png;base64,${base64}` });
   } catch (e) {
     return NextResponse.json({ error: e.message ?? 'Внутрішня помилка сервера' }, { status: 500 });
