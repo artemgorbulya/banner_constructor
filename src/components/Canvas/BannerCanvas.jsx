@@ -3,7 +3,7 @@ import { Stage, Layer, Rect, Image as KonvaImage, Group } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectCanvasSize, selectBackground, selectBackgroundImage, selectElements,
-  setSelectedId, updateBackgroundImage,
+  selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins,
 } from '../../store/editorSlice';
 import ElementNode from './ElementNode';
 import CanvasTransformer from './CanvasTransformer';
@@ -69,9 +69,13 @@ export default function BannerCanvas({ stageRef }) {
   const background = useSelector(selectBackground);
   const backgroundImage = useSelector(selectBackgroundImage);
   const elements = useSelector(selectElements);
+  const selectedId = useSelector(selectSelectedId);
+  const safeAreaEnabled = useSelector(selectSafeAreaEnabled);
+  const safeAreaMargins = useSelector(selectSafeAreaMargins);
   const containerRef = useRef(null);
   const layerRef = useRef(null);
   const [scale, setScale] = useState(1);
+  const [sizeLabel, setSizeLabel] = useState(null); // {w, h, stageX, stageY}
 
   useEffect(() => {
     function resize() {
@@ -89,6 +93,44 @@ export default function BannerCanvas({ stageRef }) {
     if (containerRef.current) ro.observe(containerRef.current);
     return () => ro.disconnect();
   }, [canvasSize]);
+
+  // Show size label when element is selected (idle)
+  useEffect(() => {
+    if (!selectedId) { setSizeLabel(null); return; }
+
+    if (selectedId === BG_ID) {
+      if (!backgroundImage.src) { setSizeLabel(null); return; }
+      setSizeLabel({
+        w: Math.round(backgroundImage.width),
+        h: Math.round(backgroundImage.height),
+        stageX: (backgroundImage.x + backgroundImage.width + OVERFLOW) * scale,
+        stageY: (backgroundImage.y + OVERFLOW) * scale,
+      });
+      return;
+    }
+
+    const el = elements.find(e => e.id === selectedId);
+    if (!el) { setSizeLabel(null); return; }
+    setSizeLabel({
+      w: Math.round(el.width),
+      h: el.height ? Math.round(el.height) : null,
+      stageX: (el.x + el.width + OVERFLOW) * scale,
+      stageY: (el.y + OVERFLOW) * scale,
+    });
+  }, [selectedId, elements, backgroundImage, scale]);
+
+  // Update size label live during transform
+  function handleSizeChange(node) {
+    const rect = node.getClientRect();
+    const w = Math.round(node.width() * node.scaleX());
+    const h = Math.round(node.height() * node.scaleY());
+    setSizeLabel({
+      w,
+      h,
+      stageX: (rect.x + rect.width) * scale,
+      stageY: rect.y * scale,
+    });
+  }
 
   const previewW = Math.round((canvasSize.width + OVERFLOW * 2) * scale);
   const previewH = Math.round((canvasSize.height + OVERFLOW * 2) * scale);
@@ -109,52 +151,67 @@ export default function BannerCanvas({ stageRef }) {
         </Layer>
       </Stage>
 
-      {/* Preview stage.
-          Layout: Stage is (canvas + OVERFLOW*2) in canvas-units wide/tall.
-          Banner content lives in an outer Group offset by OVERFLOW so that
-          element coordinates stay in banner-space (0,0 = banner top-left).
-          A clip Group inside restricts the VISUAL rendering to the banner rect,
-          preventing backgrounds/images from spilling outside the white area.
-          The Transformer is placed OUTSIDE the clip Group so its handles
-          render at the element's true bounds — visible in the overflow zone. */}
-      <Stage
-        width={previewW}
-        height={previewH}
-        scaleX={scale}
-        scaleY={scale}
-        style={{ flexShrink: 0 }}
-        onMouseDown={e => { if (e.target === e.target.getStage()) dispatch(setSelectedId(null)); }}
-        onTap={e => { if (e.target === e.target.getStage()) dispatch(setSelectedId(null)); }}
-      >
-        <Layer ref={layerRef}>
-          <Group x={OVERFLOW} y={OVERFLOW}>
-            {/* Banner shadow + solid background.
-                onMouseDown here handles deselection when clicking on empty canvas area. */}
-            <Rect
-              width={canvasSize.width}
-              height={canvasSize.height}
-              fill={background.color}
-              shadowColor="rgba(0,0,0,0.35)"
-              shadowBlur={22}
-              shadowOffsetY={4}
-              onMouseDown={() => dispatch(setSelectedId(null))}
-            />
-            {/* Content clipped to banner bounds — nothing spills outside */}
-            <Group
-              clipX={0}
-              clipY={0}
-              clipWidth={canvasSize.width}
-              clipHeight={canvasSize.height}
-            >
-              <BgImageNode bgImage={backgroundImage} interactive={true} dispatch={dispatch} />
-              {elements.map(el => <ElementNode key={el.id} el={el} />)}
-            </Group>
-          </Group>
+      {/* Preview stage wrapped in relative div so tooltip can be positioned over it */}
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+        <Stage
+          width={previewW}
+          height={previewH}
+          scaleX={scale}
+          scaleY={scale}
+          style={{ display: 'block' }}
+          onMouseDown={e => { if (e.target === e.target.getStage()) dispatch(setSelectedId(null)); }}
+          onTap={e => { if (e.target === e.target.getStage()) dispatch(setSelectedId(null)); }}
+        >
+          <Layer ref={layerRef}>
+            <Group x={OVERFLOW} y={OVERFLOW}>
+              <Rect
+                width={canvasSize.width}
+                height={canvasSize.height}
+                fill={background.color}
+                shadowColor="rgba(0,0,0,0.35)"
+                shadowBlur={22}
+                shadowOffsetY={4}
+                onMouseDown={() => dispatch(setSelectedId(null))}
+              />
+              <Group
+                clipX={0}
+                clipY={0}
+                clipWidth={canvasSize.width}
+                clipHeight={canvasSize.height}
+              >
+                <BgImageNode bgImage={backgroundImage} interactive={true} dispatch={dispatch} />
+                {elements.map(el => <ElementNode key={el.id} el={el} />)}
+              </Group>
 
-          {/* Transformer outside all clip groups — handles visible in overflow zone */}
-          <CanvasTransformer layerRef={layerRef} />
-        </Layer>
-      </Stage>
+              {safeAreaEnabled && (
+                <Rect
+                  x={safeAreaMargins.left}
+                  y={safeAreaMargins.top}
+                  width={canvasSize.width - safeAreaMargins.left - safeAreaMargins.right}
+                  height={canvasSize.height - safeAreaMargins.top - safeAreaMargins.bottom}
+                  stroke="#FF0000"
+                  strokeWidth={1}
+                  strokeScaleEnabled={false}
+                  dash={[8, 5]}
+                  listening={false}
+                  perfectDrawEnabled={false}
+                />
+              )}
+            </Group>
+
+            <CanvasTransformer layerRef={layerRef} onSizeChange={handleSizeChange} />
+          </Layer>
+        </Stage>
+
+        {sizeLabel && (
+          <div
+            className="size-tooltip"
+            style={{ left: sizeLabel.stageX, top: sizeLabel.stageY }}
+          >
+            {sizeLabel.h != null ? `${sizeLabel.w} × ${sizeLabel.h}` : `${sizeLabel.w} px`}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

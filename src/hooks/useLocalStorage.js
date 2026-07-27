@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { selectCanvasSize, selectBackground, selectBackgroundImage, selectElements } from '../store/editorSlice';
+import { selectCanvasSize, selectBackground, selectBackgroundImage, selectElements, selectSafeAreaMargins } from '../store/editorSlice';
 
 const KEY = 'banner_project_v2';
 
@@ -9,12 +9,13 @@ export function useLocalStorageSave() {
   const background = useSelector(selectBackground);
   const backgroundImage = useSelector(selectBackgroundImage);
   const elements = useSelector(selectElements);
+  const safeAreaMargins = useSelector(selectSafeAreaMargins);
 
   useEffect(() => {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ canvasSize, background, backgroundImage, elements }));
+      localStorage.setItem(KEY, JSON.stringify({ canvasSize, background, backgroundImage, elements, safeAreaMargins }));
     } catch {
       // storage quota exceeded — ignore
     }
-  }, [canvasSize, background, backgroundImage, elements]);
+  }, [canvasSize, background, backgroundImage, elements, safeAreaMargins]);
 }

@@ -11,7 +11,7 @@ const ALL_ANCHORS = [
 
 const TEXT_ANCHORS = ['middle-left', 'middle-right'];
 
-export default function CanvasTransformer({ layerRef }) {
+export default function CanvasTransformer({ layerRef, onSizeChange }) {
   const trRef = useRef(null);
   const selectedId = useSelector(selectSelectedId);
   const keepRatio = useSelector(selectKeepRatio);
@@ -52,6 +52,7 @@ export default function CanvasTransformer({ layerRef }) {
       rotateEnabled={!isText}
       keepRatio={isText ? false : keepRatio}
       enabledAnchors={isText ? TEXT_ANCHORS : ALL_ANCHORS}
+      onTransform={e => onSizeChange?.(e.target)}
       boundBoxFunc={(oldBox, newBox) => {
         if (newBox.width < 10 || newBox.height < 10) return oldBox;
 

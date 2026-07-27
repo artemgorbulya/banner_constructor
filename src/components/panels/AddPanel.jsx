@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addElement, setBackground, clearBackgroundImage, selectBackground, selectBackgroundImage, selectCanvasSize } from '../../store/editorSlice';
+import { addElement, setBackground, pushHistory, selectBackground, selectBackgroundImage, selectCanvasSize } from '../../store/editorSlice';
 import ImageModal from '../modals/ImageModal';
+import AiGenerateModal from '../modals/AiGenerateModal';
 import { ChromePicker } from 'react-color';
-import { Type, Image, Wallpaper, X } from 'lucide-react';
+import { Type, Image, Wallpaper, Sparkles } from 'lucide-react';
 
 export default function AddPanel() {
   const dispatch = useDispatch();
@@ -13,6 +14,8 @@ export default function AddPanel() {
   const [showImageModal, setShowImageModal] = useState(false);
   const [showBgModal, setShowBgModal] = useState(false);
   const [showBgColor, setShowBgColor] = useState(false);
+  const [showAi, setShowAi] = useState(false);
+  const colorHistorySaved = useRef(false);
 
   function addText() {
     dispatch(addElement({
@@ -57,7 +60,7 @@ export default function AddPanel() {
           <button
             className={`bg-btn ${showBgColor ? 'bg-btn-active' : ''}`}
             title="Колір фону"
-            onClick={() => { setShowBgColor(v => !v); }}
+            onClick={() => { colorHistorySaved.current = false; setShowBgColor(v => !v); }}
           >
             <span className="bg-swatch" style={{ background: background.color }} />
             <span>Колір</span>
@@ -74,20 +77,27 @@ export default function AddPanel() {
             }
             <span>Зображення</span>
           </button>
-          {backgroundImage.src && (
-            <button
-              className="btn btn-icon-sm btn-danger"
-              title="Прибрати фон"
-              onClick={() => dispatch(clearBackgroundImage())}
-              style={{ alignSelf: 'center' }}
-            ><X size={14} /></button>
-          )}
+          {/* AI генерація */}
+          <button
+            className="bg-btn"
+            title="Згенерувати фон через AI"
+            onClick={() => setShowAi(true)}
+          >
+            <span className="add-btn-icon"><Sparkles size={18} /></span>
+            <span>AI Фон</span>
+          </button>
         </div>
         {showBgColor && (
           <div className="color-picker-wrap" style={{ marginTop: 8 }}>
             <ChromePicker
               color={background.color}
-              onChange={c => dispatch(setBackground({ color: c.hex }))}
+              onChange={c => {
+                if (!colorHistorySaved.current) {
+                  dispatch(pushHistory());
+                  colorHistorySaved.current = true;
+                }
+                dispatch(setBackground({ color: c.hex }));
+              }}
               disableAlpha
             />
           </div>
@@ -96,6 +106,7 @@ export default function AddPanel() {
 
       {showImageModal && <ImageModal mode="element" onClose={() => setShowImageModal(false)} />}
       {showBgModal && <ImageModal mode="background" onClose={() => setShowBgModal(false)} />}
+      {showAi && <AiGenerateModal onClose={() => setShowAi(false)} />}
     </aside>
   );
 }

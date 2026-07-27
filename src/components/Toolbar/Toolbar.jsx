@@ -4,12 +4,12 @@ import {
   undoHistory, redoHistory, resetProject,
   selectCanUndo, selectCanRedo, selectSnapEnabled, toggleSnapGrid,
   selectKeepRatio, toggleKeepRatio,
+  selectSafeAreaEnabled, toggleSafeArea,
 } from '../../store/editorSlice';
 import SizeModal from '../modals/SizeModal';
 import ExportModal from '../modals/ExportModal';
 import InfoModal from '../modals/InfoModal';
-import AiGenerateModal from '../modals/AiGenerateModal';
-import { Undo2, Redo2, Lock, Unlock, Grid3x3, Download, Info, Sparkles } from 'lucide-react';
+import { Undo2, Redo2, Lock, Unlock, Grid3x3, Download, Info, Scan } from 'lucide-react';
 
 export default function Toolbar({ stageRef }) {
   const dispatch = useDispatch();
@@ -17,10 +17,10 @@ export default function Toolbar({ stageRef }) {
   const canRedo = useSelector(selectCanRedo);
   const snapEnabled = useSelector(selectSnapEnabled);
   const keepRatio = useSelector(selectKeepRatio);
+  const safeAreaEnabled = useSelector(selectSafeAreaEnabled);
   const [showSize, setShowSize] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [showAi, setShowAi] = useState(false);
 
   function handleNew() {
     if (confirm('Створити новий проект? Поточний буде втрачено.')) {
@@ -33,11 +33,12 @@ export default function Toolbar({ stageRef }) {
   return (
     <>
       <header className="toolbar">
-        <div className="toolbar-brand">Banner Constructor</div>
+        <div className="toolbar-brand">
+          <img src="/logo.png" alt="RozBanCon" className="toolbar-logo" />
+        </div>
         <div className="toolbar-actions">
           <button className="btn btn-ghost" onClick={handleNew}>Новий</button>
           <button className="btn btn-ghost" onClick={() => setShowSize(true)}>Розмір</button>
-          <button className="btn btn-ghost" onClick={() => setShowAi(true)}><Sparkles size={14} /> AI Фон</button>
           <div className="toolbar-divider" />
           <button className="btn btn-icon" title="Скасувати (Ctrl+Z)" disabled={!canUndo} onClick={() => dispatch(undoHistory())}><Undo2 size={16} /></button>
           <button className="btn btn-icon" title="Повторити (Ctrl+Shift+Z)" disabled={!canRedo} onClick={() => dispatch(redoHistory())}><Redo2 size={16} /></button>
@@ -56,6 +57,13 @@ export default function Toolbar({ stageRef }) {
           >
             {keepRatio ? <Lock size={14} /> : <Unlock size={14} />} Пропорції
           </button>
+          <button
+            className={`btn btn-ghost ${safeAreaEnabled ? 'btn-active' : ''}`}
+            title="Безпечна область (20px від країв)"
+            onClick={() => dispatch(toggleSafeArea())}
+          >
+            <Scan size={14} /> Безпечна область
+          </button>
           <div className="toolbar-divider" />
           <button className="btn btn-primary" onClick={() => setShowExport(true)}><Download size={14} /> Експорт</button>
         </div>
@@ -64,7 +72,6 @@ export default function Toolbar({ stageRef }) {
       {showSize && <SizeModal onClose={() => setShowSize(false)} />}
       {showExport && <ExportModal stageRef={stageRef} onClose={() => setShowExport(false)} />}
       {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
-      {showAi && <AiGenerateModal onClose={() => setShowAi(false)} />}
     </>
   );
 }
