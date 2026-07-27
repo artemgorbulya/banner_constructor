@@ -4,11 +4,12 @@ import {
   undoHistory, redoHistory, resetProject,
   selectCanUndo, selectCanRedo, selectSnapEnabled, toggleSnapGrid,
   selectKeepRatio, toggleKeepRatio,
+  selectSafeAreaEnabled, toggleSafeArea,
 } from '../../store/editorSlice';
 import SizeModal from '../modals/SizeModal';
 import ExportModal from '../modals/ExportModal';
 import InfoModal from '../modals/InfoModal';
-import { Undo2, Redo2, Lock, Unlock, Grid3x3, Download, Info } from 'lucide-react';
+import { Undo2, Redo2, Lock, Unlock, Grid3x3, Download, Info, Scan } from 'lucide-react';
 
 export default function Toolbar({ stageRef }) {
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ export default function Toolbar({ stageRef }) {
   const canRedo = useSelector(selectCanRedo);
   const snapEnabled = useSelector(selectSnapEnabled);
   const keepRatio = useSelector(selectKeepRatio);
+  const safeAreaEnabled = useSelector(selectSafeAreaEnabled);
   const [showSize, setShowSize] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -54,6 +56,13 @@ export default function Toolbar({ stageRef }) {
             onClick={() => dispatch(toggleKeepRatio())}
           >
             {keepRatio ? <Lock size={14} /> : <Unlock size={14} />} Пропорції
+          </button>
+          <button
+            className={`btn btn-ghost ${safeAreaEnabled ? 'btn-active' : ''}`}
+            title="Безпечна область (20px від країв)"
+            onClick={() => dispatch(toggleSafeArea())}
+          >
+            <Scan size={14} /> Безпечна область
           </button>
           <div className="toolbar-divider" />
           <button className="btn btn-primary" onClick={() => setShowExport(true)}><Download size={14} /> Експорт</button>

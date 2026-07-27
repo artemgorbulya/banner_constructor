@@ -21,6 +21,8 @@ function loadSavedState() {
       selectedId: null,
       snapEnabled: true,
       keepRatio: true,
+      safeAreaEnabled: true,
+      safeAreaMargins: data.safeAreaMargins ?? { top: 24, right: 32, bottom: 48, left: 32 },
       history: { past: [], future: [] },
     };
   } catch {
