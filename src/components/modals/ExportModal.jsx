@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { exportBanner } from '../../lib/export';
-import { X } from 'lucide-react';
+import { X, AlertTriangle } from 'lucide-react';
+
+const SIZE_LIMIT_KB = 150;
 
 function calcSizeKB(stageRef, format, quality) {
   const stage = stageRef.current;
@@ -63,9 +65,18 @@ export default function ExportModal({ stageRef, onClose }) {
           )}
           <div className="export-size-row">
             <span className="export-size-label">Розмір файлу:</span>
-            <span className="export-size-value">
+            <span className={`export-size-value ${fileSize !== null && fileSize > SIZE_LIMIT_KB ? 'export-size-over' : ''}`}>
               {fileSize === null ? '…' : `~${fileSize} КБ`}
             </span>
+          </div>
+          {fileSize !== null && fileSize > SIZE_LIMIT_KB && (
+            <div className="export-size-warning">
+              <AlertTriangle size={14} />
+              Розмір файлу перевищує {SIZE_LIMIT_KB} КБ. Рекомендований максимум для банерів — {SIZE_LIMIT_KB} КБ. Спробуйте формат JPG або знизьте якість.
+            </div>
+          )}
+          <div className="export-size-hint">
+            Рекомендований максимальний розмір файлу: <strong>{SIZE_LIMIT_KB} КБ</strong>
           </div>
         </div>
         <div className="modal-footer">

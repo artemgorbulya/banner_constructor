@@ -198,6 +198,20 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
 .size-inputs input { width: 100%; }
 .size-sep { font-size: 18px; color: var(--text-muted); padding-bottom: 4px; }
 
+/* ─── Safe area margins in SizeModal ────────────────────── */
+.safe-margins-section { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 14px; }
+.safe-margins-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.safe-margins-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--text-muted); }
+.btn-sm { font-size: 11px; padding: 2px 8px; }
+.safe-margins-grid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.safe-margins-top, .safe-margins-bottom { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.safe-margins-middle { display: flex; align-items: center; gap: 10px; }
+.safe-margin-side { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.safe-margin-label { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+.safe-margin-input { width: 60px; text-align: center; }
+.safe-margin-preview { width: 80px; height: 44px; border: 1px solid var(--border); border-radius: 3px; position: relative; flex-shrink: 0; }
+.safe-margin-rect { position: absolute; inset: 6px; border: 1px dashed #FF0000; border-radius: 1px; }
+
 /* ─── AI Generate modal ─────────────────────────────────── */
 .ai-preview-area { min-height: 120px; border-radius: 8px; overflow: hidden; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
 .ai-preview-area img { width: 100%; max-height: 220px; object-fit: cover; display: block; }
@@ -224,6 +238,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
 .export-size-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: var(--surface2); border-radius: 6px; border: 1px solid var(--border); }
 .export-size-label { font-size: 12px; color: var(--text-muted); }
 .export-size-value { font-size: 13px; font-weight: 600; color: var(--accent); }
+.export-size-over { color: var(--danger) !important; }
+.export-size-warning { display: flex; align-items: flex-start; gap: 7px; background: rgba(224,92,106,0.12); border: 1px solid rgba(224,92,106,0.4); border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--danger); line-height: 1.4; margin-top: 2px; }
+.export-size-warning svg { flex-shrink: 0; margin-top: 1px; }
+.export-size-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
 .form-row { display: flex; flex-direction: column; gap: 6px; }
 .form-label { font-size: 12px; color: var(--text-muted); }
 .radio-group { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
@@ -280,6 +298,24 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
 .lib-empty-hint code { background: var(--surface2); padding: 1px 4px; border-radius: 3px; font-size: 10px; }
 
 /* ─── Remove BG stub ────────────────────────────────────── */
+/* ─── Resize confirm dialog ──────────────────────────────── */
+.resize-confirm-text { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+.resize-confirm-options { display: flex; flex-direction: column; gap: 8px; }
+.resize-confirm-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 8px; cursor: pointer; text-align: left;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); transition: background .15s, border-color .15s;
+}
+.resize-confirm-option:hover { background: var(--border); border-color: var(--accent); }
+.resize-confirm-option--danger:hover { border-color: var(--danger); }
+.resize-confirm-option--danger .resize-confirm-label { color: var(--danger); }
+.resize-confirm-icon { flex-shrink: 0; color: var(--accent); }
+.resize-confirm-option--danger .resize-confirm-icon { color: var(--danger); }
+.resize-confirm-info { display: flex; flex-direction: column; gap: 2px; }
+.resize-confirm-label { font-size: 13px; font-weight: 600; }
+.resize-confirm-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
 .removebg-stub { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 8px 4px; text-align: center; }
 .removebg-icon { font-size: 36px; line-height: 1; }
 .removebg-title { font-size: 15px; font-weight: 600; color: var(--text); margin: 0; }

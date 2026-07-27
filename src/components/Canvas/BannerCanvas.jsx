@@ -3,7 +3,7 @@ import { Stage, Layer, Rect, Image as KonvaImage, Group } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectCanvasSize, selectBackground, selectBackgroundImage, selectElements,
-  selectSelectedId, setSelectedId, updateBackgroundImage,
+  selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins,
 } from '../../store/editorSlice';
 import ElementNode from './ElementNode';
 import CanvasTransformer from './CanvasTransformer';
@@ -70,6 +70,8 @@ export default function BannerCanvas({ stageRef }) {
   const backgroundImage = useSelector(selectBackgroundImage);
   const elements = useSelector(selectElements);
   const selectedId = useSelector(selectSelectedId);
+  const safeAreaEnabled = useSelector(selectSafeAreaEnabled);
+  const safeAreaMargins = useSelector(selectSafeAreaMargins);
   const containerRef = useRef(null);
   const layerRef = useRef(null);
   const [scale, setScale] = useState(1);
@@ -180,6 +182,21 @@ export default function BannerCanvas({ stageRef }) {
                 <BgImageNode bgImage={backgroundImage} interactive={true} dispatch={dispatch} />
                 {elements.map(el => <ElementNode key={el.id} el={el} />)}
               </Group>
+
+              {safeAreaEnabled && (
+                <Rect
+                  x={safeAreaMargins.left}
+                  y={safeAreaMargins.top}
+                  width={canvasSize.width - safeAreaMargins.left - safeAreaMargins.right}
+                  height={canvasSize.height - safeAreaMargins.top - safeAreaMargins.bottom}
+                  stroke="#FF0000"
+                  strokeWidth={1}
+                  strokeScaleEnabled={false}
+                  dash={[8, 5]}
+                  listening={false}
+                  perfectDrawEnabled={false}
+                />
+              )}
             </Group>
 
             <CanvasTransformer layerRef={layerRef} onSizeChange={handleSizeChange} />

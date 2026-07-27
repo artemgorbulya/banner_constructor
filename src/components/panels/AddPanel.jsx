@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addElement, setBackground, selectBackground, selectBackgroundImage, selectCanvasSize } from '../../store/editorSlice';
+import { addElement, setBackground, pushHistory, selectBackground, selectBackgroundImage, selectCanvasSize } from '../../store/editorSlice';
 import ImageModal from '../modals/ImageModal';
 import AiGenerateModal from '../modals/AiGenerateModal';
 import { ChromePicker } from 'react-color';
@@ -15,6 +15,7 @@ export default function AddPanel() {
   const [showBgModal, setShowBgModal] = useState(false);
   const [showBgColor, setShowBgColor] = useState(false);
   const [showAi, setShowAi] = useState(false);
+  const colorHistorySaved = useRef(false);
 
   function addText() {
     dispatch(addElement({
@@ -59,7 +60,7 @@ export default function AddPanel() {
           <button
             className={`bg-btn ${showBgColor ? 'bg-btn-active' : ''}`}
             title="Колір фону"
-            onClick={() => { setShowBgColor(v => !v); }}
+            onClick={() => { colorHistorySaved.current = false; setShowBgColor(v => !v); }}
           >
             <span className="bg-swatch" style={{ background: background.color }} />
             <span>Колір</span>
@@ -90,7 +91,13 @@ export default function AddPanel() {
           <div className="color-picker-wrap" style={{ marginTop: 8 }}>
             <ChromePicker
               color={background.color}
-              onChange={c => dispatch(setBackground({ color: c.hex }))}
+              onChange={c => {
+                if (!colorHistorySaved.current) {
+                  dispatch(pushHistory());
+                  colorHistorySaved.current = true;
+                }
+                dispatch(setBackground({ color: c.hex }));
+              }}
               disableAlpha
             />
           </div>
