@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
-import { Provider } from 'react-redux';
+import { useRef, useEffect } from 'react';
+import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
+import { selectSelectedElement } from './store/editorSlice';
 import { useKeyboard } from './hooks/useKeyboard';
 import { useLocalStorageSave } from './hooks/useLocalStorage';
 import Toolbar from './components/Toolbar/Toolbar';
@@ -14,8 +15,16 @@ import ElementSizeControls from './components/panels/ElementSizeControls';
 
 function EditorInner() {
   const stageRef = useRef(null);
+  const textControlsRef = useRef(null);
+  const selectedElement = useSelector(selectSelectedElement);
   useKeyboard();
   useLocalStorageSave();
+
+  useEffect(() => {
+    if (selectedElement?.type === 'text' && textControlsRef.current) {
+      textControlsRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selectedElement?.id, selectedElement?.type]);
 
   return (
     <div className="app">
@@ -26,7 +35,9 @@ function EditorInner() {
         <div className="right-panel">
           <AddPanel />
           <ElementSizeControls />
-          <TextControls />
+          <div ref={textControlsRef}>
+            <TextControls />
+          </div>
         </div>
       </div>
     </div>

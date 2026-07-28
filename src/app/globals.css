@@ -83,7 +83,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
   display: flex;
   flex-direction: column;
 }
-.right-panel { border-right: none; border-left: 1px solid var(--border); overflow: hidden; }
+.right-panel { border-right: none; border-left: 1px solid var(--border); overflow-y: auto; }
 .right-panel .side-panel { flex-shrink: 0; overflow: visible; }
 
 .panel-section { padding: 12px; border-bottom: 1px solid var(--border); }
@@ -118,7 +118,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
 .add-btn-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
 
 /* ─── Text controls ──────────────────────────────────────── */
-.text-controls { padding: 12px; border-top: 1px solid var(--border); flex: 1; overflow-y: auto; min-height: 0; }
+.text-controls { padding: 12px; border-top: 1px solid var(--border); }
 .control-label { display: block; font-size: 11px; color: var(--text-muted); margin: 10px 0 4px; }
 .font-loading-hint { color: var(--accent); opacity: .8; }
 .text-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 5px 8px; font-size: 12px; }
