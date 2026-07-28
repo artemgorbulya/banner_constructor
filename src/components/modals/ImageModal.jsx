@@ -255,7 +255,19 @@ export default function ImageModal({ mode, onClose }) {
   const [urlError, setUrlError] = useState('');
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [libPreview, setLibPreview] = useState(null); // { src, x, y }
   const fileRef = useRef(null);
+
+  function showPreview(e, src) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pw = 300;
+    const ph = 300;
+    let x = rect.right + 10;
+    let y = rect.top;
+    if (x + pw > window.innerWidth - 8) x = rect.left - pw - 10;
+    if (y + ph > window.innerHeight - 8) y = window.innerHeight - ph - 8;
+    setLibPreview({ src, x, y });
+  }
 
   // Only show categories that have items
   const visibleCats = LIBRARY.filter(c => c.items.length > 0);
@@ -409,6 +421,8 @@ export default function ImageModal({ mode, onClose }) {
                       key={item.name}
                       className="library-item"
                       onClick={() => placeImage(item.src)}
+                      onMouseEnter={e => showPreview(e, item.src)}
+                      onMouseLeave={() => setLibPreview(null)}
                     >
                       <img src={item.src} alt={item.name} />
                       <span>{item.name}</span>
@@ -427,6 +441,15 @@ export default function ImageModal({ mode, onClose }) {
           )}
         </div>
       </div>
+
+      {libPreview && (
+        <div
+          className="lib-preview-popup"
+          style={{ left: libPreview.x, top: libPreview.y }}
+        >
+          <img src={libPreview.src} alt="preview" />
+        </div>
+      )}
     </div>
   );
 }
