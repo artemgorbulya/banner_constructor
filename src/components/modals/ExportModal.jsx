@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { exportBanner } from '../../lib/export';
-import { X, AlertTriangle } from 'lucide-react';
+import { X, AlertTriangle, Save } from 'lucide-react';
 
 const SIZE_LIMIT_KB = 150;
 
@@ -17,7 +17,7 @@ function calcSizeKB(stageRef, format, quality) {
   return Math.round((base64.length * 0.75 - padding) / 1024);
 }
 
-export default function ExportModal({ stageRef, onClose }) {
+export default function ExportModal({ stageRef, onClose, onSaveAsProject }) {
   const [format, setFormat] = useState('png');
   const [quality, setQuality] = useState(0.9);
   const [fileSize, setFileSize] = useState(null);
@@ -81,6 +81,11 @@ export default function ExportModal({ stageRef, onClose }) {
         </div>
         <div className="modal-footer">
           <button className="btn btn-ghost" onClick={onClose}>Скасувати</button>
+          {onSaveAsProject && (
+            <button className="btn btn-ghost" onClick={onSaveAsProject}>
+              <Save size={14} /> Зберегти як проект
+            </button>
+          )}
           <button className="btn btn-primary" onClick={handleExport}>Завантажити</button>
         </div>
       </div>
