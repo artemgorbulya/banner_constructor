@@ -406,3 +406,109 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
   max-height: 100%;
   object-fit: contain;
 }
+
+/* ─── Projects modal ─────────────────────────────────────── */
+.modal-xl { width: min(780px, 95vw); }
+
+.projects-actions-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.projects-storage-info { font-size: 11px; color: var(--text-muted); }
+.projects-import-error {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--danger);
+}
+
+.projects-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 36px 16px; color: var(--text-muted); text-align: center;
+}
+.projects-empty-title { font-size: 14px; color: var(--text); font-weight: 600; }
+.projects-empty-desc { font-size: 12px; line-height: 1.5; max-width: 300px; }
+
+/* ─── Project card grid ──────────────────────────────────── */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.project-card {
+  position: relative; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  cursor: pointer; overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: border-color .15s, box-shadow .15s;
+}
+.project-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px rgba(124,110,245,.15);
+}
+
+.project-thumb-wrap {
+  width: 100%; height: 88px; overflow: hidden;
+  background: var(--workspace); position: relative; flex-shrink: 0;
+}
+.project-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+.project-thumb-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-muted);
+}
+
+.project-load-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .15s;
+}
+.project-card:hover .project-load-overlay { opacity: 1; }
+.project-load-text {
+  color: #fff; font-size: 12px; font-weight: 600;
+  background: rgba(124,110,245,.85); padding: 4px 14px; border-radius: 20px;
+}
+
+.project-info { padding: 8px 10px; flex: 1; min-width: 0; }
+.project-name {
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+}
+.project-date { font-size: 10px; color: var(--text-muted); }
+
+.project-export-btn, .project-delete-btn {
+  position: absolute; top: 6px;
+  background: rgba(0,0,0,.65); border: none; border-radius: 4px;
+  cursor: pointer; padding: 4px 5px;
+  display: flex; align-items: center;
+  opacity: 0; transition: opacity .15s;
+}
+.project-export-btn { right: 30px; color: var(--text-muted); }
+.project-delete-btn { right: 6px; color: var(--danger); }
+.project-card:hover .project-export-btn,
+.project-card:hover .project-delete-btn { opacity: 1; }
+.project-export-btn:hover { background: rgba(124,110,245,.3); color: var(--text); }
+.project-delete-btn:hover { background: rgba(224,92,106,.25); }
+
+/* ─── Save view ──────────────────────────────────────────── */
+.project-save-thumb-wrap {
+  width: 100%; border-radius: 6px; overflow: hidden;
+  background: var(--workspace); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; min-height: 100px;
+}
+.project-save-thumb { max-width: 100%; max-height: 180px; display: block; }
+
+/* ─── Inline warnings ────────────────────────────────────── */
+.projects-warning {
+  display: flex; align-items: flex-start; gap: 7px;
+  background: rgba(224,92,106,.12); border: 1px solid rgba(224,92,106,.4);
+  border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--danger);
+  line-height: 1.4; margin-top: 8px;
+}
+.projects-info-note {
+  display: flex; align-items: flex-start; gap: 7px;
+  background: rgba(124,110,245,.08); border: 1px solid rgba(124,110,245,.25);
+  border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--text-muted);
+  line-height: 1.4; margin-top: 8px;
+}
+.projects-warning svg, .projects-info-note svg { flex-shrink: 0; margin-top: 1px; }

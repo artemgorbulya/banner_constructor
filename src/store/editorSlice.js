@@ -188,11 +188,12 @@ export const editorSlice = createSlice({
       Object.assign(state, { ...initialState, history: { past: [], future: [] } });
     },
     loadProject(state, action) {
-      const { canvasSize, background, backgroundImage, elements } = action.payload;
+      const { canvasSize, background, backgroundImage, elements, safeAreaMargins } = action.payload;
       state.canvasSize = canvasSize;
       state.background = background ?? { color: '#ffffff' };
       state.backgroundImage = backgroundImage ?? { src: null, x: 0, y: 0, width: 0, height: 0, rotation: 0 };
-      state.elements = elements;
+      state.elements = elements ?? [];
+      state.safeAreaMargins = safeAreaMargins ?? { top: 24, right: 32, bottom: 48, left: 32 };
       state.selectedId = null;
       state.history = { past: [], future: [] };
     },
