@@ -3,8 +3,22 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
+const vitestGlobals = {
+  vi: 'readonly', describe: 'readonly', it: 'readonly', test: 'readonly',
+  expect: 'readonly', beforeEach: 'readonly', afterEach: 'readonly',
+  beforeAll: 'readonly', afterAll: 'readonly',
+};
+
 export default defineConfig([
   globalIgnores(['dist', '.next']),
+  {
+    files: ['src/test/**/*.{js,jsx}'],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      globals: { ...globals.browser, ...vitestGlobals },
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+  },
   {
     files: ['**/*.{js,jsx}'],
     extends: [
