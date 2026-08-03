@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import reducer, {
   addElement, prependElement, updateElement, updateElementWithHistory,
   deleteElement, reorderLayers,
   undoHistory, redoHistory,
   setCanvasSizeAndScale, setCanvasSizeAndClear,
   setBackground, setBackgroundWithHistory,
-  setBackgroundImage, updateBackgroundImage, clearBackgroundImage,
+  setBackgroundImage, clearBackgroundImage,
   toggleSafeArea, toggleLogoFrame, toggleDeviceFrames,
   setSafeAreaMargins, setSelectedId,
   resetProject, loadProject,
