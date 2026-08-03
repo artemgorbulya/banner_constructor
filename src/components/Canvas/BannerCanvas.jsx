@@ -3,7 +3,7 @@ import { Stage, Layer, Rect, Image as KonvaImage, Group } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectCanvasSize, selectBackground, selectBackgroundImage, selectElements,
-  selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins,
+  selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins, selectLogoFrameEnabled, selectDeviceFramesEnabled,
 } from '../../store/editorSlice';
 import ElementNode from './ElementNode';
 import CanvasTransformer from './CanvasTransformer';
@@ -72,6 +72,8 @@ export default function BannerCanvas({ stageRef }) {
   const selectedId = useSelector(selectSelectedId);
   const safeAreaEnabled = useSelector(selectSafeAreaEnabled);
   const safeAreaMargins = useSelector(selectSafeAreaMargins);
+  const logoFrameEnabled = useSelector(selectLogoFrameEnabled);
+  const deviceFramesEnabled = useSelector(selectDeviceFramesEnabled);
   const containerRef = useRef(null);
   const layerRef = useRef(null);
   const [scale, setScale] = useState(1);
@@ -184,18 +186,58 @@ export default function BannerCanvas({ stageRef }) {
               </Group>
 
               {safeAreaEnabled && (
-                <Rect
-                  x={safeAreaMargins.left}
-                  y={safeAreaMargins.top}
-                  width={canvasSize.width - safeAreaMargins.left - safeAreaMargins.right}
-                  height={canvasSize.height - safeAreaMargins.top - safeAreaMargins.bottom}
-                  stroke="#FF0000"
-                  strokeWidth={1}
-                  strokeScaleEnabled={false}
-                  dash={[8, 5]}
-                  listening={false}
-                  perfectDrawEnabled={false}
-                />
+                <>
+                  <Rect
+                    x={safeAreaMargins.left}
+                    y={safeAreaMargins.top}
+                    width={canvasSize.width - safeAreaMargins.left - safeAreaMargins.right}
+                    height={canvasSize.height - safeAreaMargins.top - safeAreaMargins.bottom}
+                    stroke="#FF0000"
+                    strokeWidth={1}
+                    strokeScaleEnabled={false}
+                    dash={[8, 5]}
+                    listening={false}
+                    perfectDrawEnabled={false}
+                  />
+                  {logoFrameEnabled && (
+                    <Rect
+                      x={safeAreaMargins.left}
+                      y={safeAreaMargins.top}
+                      width={210}
+                      height={70}
+                      stroke="#FF0000"
+                      strokeWidth={1}
+                      strokeScaleEnabled={false}
+                      dash={[8, 5]}
+                      listening={false}
+                      perfectDrawEnabled={false}
+                    />
+                  )}
+                  {deviceFramesEnabled && (() => {
+                    const DEVICE_SIZE = 160;
+                    const rightX = canvasSize.width - safeAreaMargins.right - DEVICE_SIZE;
+                    const isWide = canvasSize.width > 1200;
+                    const devY1 = isWide
+                      ? Math.round((canvasSize.height - DEVICE_SIZE) / 2)
+                      : safeAreaMargins.top;
+                    const devY2 = isWide
+                      ? devY1
+                      : canvasSize.height - safeAreaMargins.bottom - DEVICE_SIZE;
+                    const devX2 = isWide ? rightX - 20 - DEVICE_SIZE : rightX;
+                    const commonProps = {
+                      width: DEVICE_SIZE, height: DEVICE_SIZE,
+                      stroke: '#FF0000', strokeWidth: 1,
+                      strokeScaleEnabled: false, dash: [8, 5],
+                      listening: false, perfectDrawEnabled: false,
+                    };
+                    return (
+                      <>
+                        <Rect x={rightX} y={devY1} {...commonProps} />
+                        <Rect x={devX2} y={devY2} {...commonProps} />
+                      </>
+                    );
+                  })()}
+                </>
               )}
             </Group>
 

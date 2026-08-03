@@ -11,6 +11,8 @@ const initialState = {
   keepRatio: true,
   safeAreaEnabled: true,
   safeAreaMargins: { top: 24, right: 32, bottom: 48, left: 32 },
+  logoFrameEnabled: true,
+  deviceFramesEnabled: true,
   history: { past: [], future: [] },
 };
 
@@ -176,6 +178,12 @@ export const editorSlice = createSlice({
     setSafeAreaMargins(state, action) {
       state.safeAreaMargins = { ...state.safeAreaMargins, ...action.payload };
     },
+    toggleLogoFrame(state) {
+      state.logoFrameEnabled = !state.logoFrameEnabled;
+    },
+    toggleDeviceFrames(state) {
+      state.deviceFramesEnabled = !state.deviceFramesEnabled;
+    },
     resetProject(state) {
       Object.assign(state, { ...initialState, history: { past: [], future: [] } });
     },
@@ -197,7 +205,7 @@ export const {
   setCanvasSize, setBackground, setBackgroundWithHistory,
   setBackgroundImage, updateBackgroundImage, clearBackgroundImage,
   addElement, prependElement, updateElement, updateElementWithHistory, deleteElement,
-  reorderLayers, setSelectedId, toggleSnapGrid, toggleKeepRatio, toggleSafeArea, setSafeAreaMargins, setCanvasSizeAndClear, setCanvasSizeAndScale,
+  reorderLayers, setSelectedId, toggleSnapGrid, toggleKeepRatio, toggleSafeArea, setSafeAreaMargins, toggleLogoFrame, toggleDeviceFrames, setCanvasSizeAndClear, setCanvasSizeAndScale,
   resetProject, loadProject,
 } = editorSlice.actions;
 
@@ -212,6 +220,8 @@ export const selectSnapEnabled = s => s.editor.snapEnabled;
 export const selectKeepRatio = s => s.editor.keepRatio;
 export const selectSafeAreaEnabled = s => s.editor.safeAreaEnabled;
 export const selectSafeAreaMargins = s => s.editor.safeAreaMargins;
+export const selectLogoFrameEnabled = s => s.editor.logoFrameEnabled;
+export const selectDeviceFramesEnabled = s => s.editor.deviceFramesEnabled;
 export const selectCanUndo = s => s.editor.history.past.length > 0;
 export const selectCanRedo = s => s.editor.history.future.length > 0;
 
