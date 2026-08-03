@@ -23,6 +23,8 @@ function loadSavedState() {
       keepRatio: true,
       safeAreaEnabled: true,
       safeAreaMargins: data.safeAreaMargins ?? { top: 24, right: 32, bottom: 48, left: 32 },
+      logoFrameEnabled: data.logoFrameEnabled ?? true,
+      deviceFramesEnabled: data.deviceFramesEnabled ?? true,
       history: { past: [], future: [] },
     };
   } catch {

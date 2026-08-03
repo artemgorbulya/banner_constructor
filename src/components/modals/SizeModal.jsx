@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCanvasSize, setCanvasSizeAndClear, setSafeAreaMargins, selectCanvasSize, selectSafeAreaMargins, selectElements, selectBackgroundImage } from '../../store/editorSlice';
+import { setCanvasSize, setCanvasSizeAndClear, setSafeAreaMargins, toggleLogoFrame, toggleDeviceFrames, selectCanvasSize, selectSafeAreaMargins, selectLogoFrameEnabled, selectDeviceFramesEnabled, selectElements, selectBackgroundImage } from '../../store/editorSlice';
 import { PRESETS } from '../../lib/presets';
 import { X } from 'lucide-react';
 import ResizeConfirmModal from './ResizeConfirmModal';
@@ -9,6 +9,8 @@ export default function SizeModal({ onClose }) {
   const dispatch = useDispatch();
   const current = useSelector(selectCanvasSize);
   const currentMargins = useSelector(selectSafeAreaMargins);
+  const logoFrameEnabled = useSelector(selectLogoFrameEnabled);
+  const deviceFramesEnabled = useSelector(selectDeviceFramesEnabled);
   const elements = useSelector(selectElements);
   const backgroundImage = useSelector(selectBackgroundImage);
 
@@ -150,6 +152,22 @@ export default function SizeModal({ onClose }) {
                 />
               </div>
             </div>
+            <label className="safe-margins-logo-checkbox">
+              <input
+                type="checkbox"
+                checked={logoFrameEnabled}
+                onChange={() => dispatch(toggleLogoFrame())}
+              />
+              Показувати рамку логотипа
+            </label>
+            <label className="safe-margins-logo-checkbox">
+              <input
+                type="checkbox"
+                checked={deviceFramesEnabled}
+                onChange={() => dispatch(toggleDeviceFrames())}
+              />
+              Показувати рамки девайсів
+            </label>
           </div>
         </div>
         <div className="modal-footer">
