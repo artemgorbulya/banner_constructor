@@ -7,6 +7,7 @@ import {
 } from '../../store/editorSlice';
 import ElementNode from './ElementNode';
 import CanvasTransformer from './CanvasTransformer';
+import { computeDeviceFrames } from '../../lib/presets';
 
 const BG_ID = '__bg_image__';
 // Extra canvas-space pixels around the banner so Transformer handles
@@ -214,26 +215,17 @@ export default function BannerCanvas({ stageRef }) {
                     />
                   )}
                   {deviceFramesEnabled && (() => {
-                    const DEVICE_SIZE = 160;
-                    const rightX = canvasSize.width - safeAreaMargins.right - DEVICE_SIZE;
-                    const isWide = canvasSize.width > 1200;
-                    const devY1 = isWide
-                      ? Math.round((canvasSize.height - DEVICE_SIZE) / 2)
-                      : safeAreaMargins.top;
-                    const devY2 = isWide
-                      ? devY1
-                      : canvasSize.height - safeAreaMargins.bottom - DEVICE_SIZE;
-                    const devX2 = isWide ? rightX - 20 - DEVICE_SIZE : rightX;
+                    const { frame1, frame2, size } = computeDeviceFrames(canvasSize, safeAreaMargins);
                     const commonProps = {
-                      width: DEVICE_SIZE, height: DEVICE_SIZE,
+                      width: size, height: size,
                       stroke: '#FF0000', strokeWidth: 1,
                       strokeScaleEnabled: false, dash: [8, 5],
                       listening: false, perfectDrawEnabled: false,
                     };
                     return (
                       <>
-                        <Rect x={rightX} y={devY1} {...commonProps} />
-                        <Rect x={devX2} y={devY2} {...commonProps} />
+                        <Rect x={frame1.x} y={frame1.y} {...commonProps} />
+                        <Rect x={frame2.x} y={frame2.y} {...commonProps} />
                       </>
                     );
                   })()}
