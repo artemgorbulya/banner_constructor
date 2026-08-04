@@ -5,13 +5,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev       # start dev server (Next.js, port 3000)
-npm run build     # production build → .next/
-npm run start     # serve production build
-npm run lint      # ESLint
+npm run dev           # start dev server (Next.js, port 3000)
+npm run build         # production build → .next/
+npm run start         # serve production build
+npm run lint          # ESLint
+
+npm run test          # Vitest in watch mode
+npm run test:run      # Vitest single run (CI)
+npm run test:coverage # coverage report via v8
 ```
 
-No test suite exists. Verification is manual in the browser.
+To run a single test file:
+```bash
+npx vitest run src/test/lib/presets.test.js
+```
 
 ## Architecture Overview
 
@@ -37,6 +44,10 @@ Layout: `LayersPanel` (left) | `BannerCanvas` (center) | `AddPanel + TextControl
 - `selectedId` — currently selected element id, or `'__bg_image__'` for the background image
 - `keepRatio` — global boolean; when true all 8 Transformer handles maintain aspect ratio
 - `snapEnabled` — snap-to-grid (10px grid)
+- `safeAreaEnabled` — toggles safe area frame visibility
+- `safeAreaMargins` — `{ top, right, bottom, left }` in px
+- `logoFrameEnabled` — toggles 210×70 logo frame (top-left of safe area)
+- `deviceFramesEnabled` — toggles two 160×160 device frames; position depends on preset layout
 - `history.past[] / future[]` — undo/redo stacks; each entry is a JSON snapshot of `elements[]`
 
 **State is loaded from `localStorage` synchronously in `store/index.js`** via `preloadedState` in `configureStore`. The guard `typeof window !== 'undefined'` prevents server-side access. Do NOT add a separate restore hook.
@@ -51,11 +62,30 @@ Key action distinction: `updateElement` (no history) is for live drag feedback; 
 
 The `CanvasTransformer` is placed **outside** the clip group so its handles are visible in the overflow zone.
 
+Safe area frames (main rect, logo frame, device frames) are rendered in the preview stage only — they are never on the export stage.
+
 **CanvasTransformer.jsx** — wraps Konva `Transformer`. Uses `keepRatioRef` and `isTextRef` (refs, not state) inside `boundBoxFunc` to avoid stale closures. For text: only `middle-left` / `middle-right` anchors, no rotation, keepRatio off. For images: all 8 anchors; `boundBoxFunc` enforces ratio on side handles by comparing `wDelta` vs `hDelta`. Uses `useLayoutEffect` + a `requestAnimationFrame` retry because React 19 concurrent mode can defer Konva node attachment past the synchronous commit phase.
 
 **ElementNode.jsx** — `ImageNode` uses `onMouseDown` (not `onClick`) for reliable first-click selection. `TextNode` uses `wrap="word"`, auto-height (no fixed height), and resets `scaleX/scaleY` to 1 in `onTransform` to prevent distortion — only `width` is persisted.
 
 **Important Konva gotcha**: never use `CSS.escape()` on element IDs when calling `layerRef.current.findOne('#id')`. UUIDs starting with digits break CSS.escape; Konva's findOne does string comparison, not CSS selector parsing.
+
+### Presets (`src/lib/presets.js`)
+
+`PRESETS` array defines banner size presets shown in `SizeModal`. Each entry has:
+- `label`, `width`, `height`, `margins` — used to populate the size dialog
+- `deviceFramesLayout` — controls how the two 160×160 device frames are positioned:
+  - `'wide'` — side by side, centered vertically in canvas (Billboard 1536px)
+  - `'tall'` — one at top-right and one at bottom-right of safe area (Web Banner 880px)
+  - `'stacked'` — both on right edge of safe area, first 20px from top, second 8px below first (Promo Banner 700px)
+
+`computeDeviceFrames(canvasSize, safeAreaMargins)` — pure function that returns `{ frame1: {x,y}, frame2: {x,y}, size }`. Used by `BannerCanvas.jsx`. Custom canvas sizes not matching any preset fall back to `'wide'` (width > 1200) or `'tall'`.
+
+To add a new banner size: add an entry to `PRESETS` with `deviceFramesLayout`. If none of the existing layouts fit, add a new layout string and handle it in `computeDeviceFrames` and its tests.
+
+### Project persistence (`src/lib/projects.js`)
+
+Projects are stored in **IndexedDB** (`banner_projects` database, `projects` store). Limit: 20 projects. Auto-save to `localStorage['banner_project_v2']` happens on every Redux state change via `syncAutoSave`. On first run, migrates any projects from the legacy `localStorage` key `banner_saved_projects`.
 
 ### Font loading (`src/lib/fonts.js`)
 
@@ -69,10 +99,30 @@ Uses `GoogleGenAI` SDK (`@google/genai`) with `ai.interactions.create()` and mod
 
 `LIBRARY` array of categories. To add images: copy file to `public/library/`, add `{ name, src: '/library/filename' }` to the target category. Empty categories are hidden in the UI.
 
-### localStorage persistence
-
-`useLocalStorageSave` (hook in `App.jsx`) saves `canvasSize + background + backgroundImage + elements` under key `banner_project_v2` on every state change. Restore happens at store creation time. Key `banner_project_v1` is a fallback for old saves.
-
 ### Export
 
 `src/lib/export.js` calls `stageRef.current.toDataURL()` on the **hidden export stage** (exact pixel dimensions, no scale). PNG is always lossless; JPG accepts a 0–1 quality param.
+
+## Testing
+
+**Stack**: Vitest + React Testing Library + jsdom. Config: `vitest.config.mjs` (`.mjs` forces ESM; takes precedence over `vitest.config.js`). Setup: `src/test/setup.js`.
+
+**Test layout**:
+```
+src/test/
+  setup.js                    ← global mocks: react-konva, file-saver, crypto.randomUUID
+  store/editorSlice.test.js   ← pure reducer tests (no React)
+  lib/presets.test.js         ← PRESETS structure + computeDeviceFrames all layouts
+  lib/projects.test.js        ← IndexedDB via fake-indexeddb
+  lib/fonts.test.js
+  lib/export.test.js
+  lib/snapGrid.test.js
+  components/Toolbar.test.jsx
+  components/modals/          ← ExportModal, ProjectsModal, SizeModal
+```
+
+**Key testing patterns**:
+- `react-konva` is fully mocked (Konva is incompatible with jsdom); `<Rect>` renders `null`, `<Stage>` renders a `<div>`
+- IndexedDB tests use `fake-indexeddb`. Each test gets a fresh instance via `globalThis.indexedDB = new IDBFactory()` + `vi.resetModules()` in `beforeEach` — this resets the `_dbPromise` singleton in `projects.js`
+- Redux is tested by calling `reducer(state, action)` directly — no React rendering needed
+- ESLint config (`eslint.config.js`) has a separate rule block for `src/test/**` that declares Vitest globals (`vi`, `describe`, `it`, `expect`, `beforeEach`, etc.)
