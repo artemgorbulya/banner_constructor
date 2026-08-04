@@ -23,6 +23,37 @@ function renderSizeModal(store = makeStore()) {
   return store;
 }
 
+describe('SizeModal — presets', () => {
+  it('renders all 3 preset buttons', () => {
+    renderSizeModal();
+    expect(screen.getByText('Billboard')).toBeInTheDocument();
+    expect(screen.getByText('Web Banner')).toBeInTheDocument();
+    expect(screen.getByText('Promo Banner')).toBeInTheDocument();
+  });
+
+  it('clicking Promo Banner sets width and height inputs to 700×465', async () => {
+    const user = userEvent.setup();
+    const store = makeStore();
+    renderSizeModal(store);
+    await user.click(screen.getByText('Promo Banner'));
+    const inputs = screen.getAllByRole('spinbutton');
+    expect(inputs[0]).toHaveValue(700);
+    expect(inputs[1]).toHaveValue(465);
+  });
+
+  it('clicking Promo Banner fills safe margins from preset', async () => {
+    const user = userEvent.setup();
+    renderSizeModal();
+    await user.click(screen.getByText('Promo Banner'));
+    const inputs = screen.getAllByRole('spinbutton');
+    // margin inputs: top, left, right, bottom (indices 2–5)
+    expect(inputs[2]).toHaveValue(36); // top
+    expect(inputs[3]).toHaveValue(20); // left
+    expect(inputs[4]).toHaveValue(43); // right
+    expect(inputs[5]).toHaveValue(30); // bottom
+  });
+});
+
 describe('SizeModal', () => {
   it('renders without crash and shows current canvas size', () => {
     renderSizeModal();
