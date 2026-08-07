@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { Stage, Layer, Rect, Image as KonvaImage, Group } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -77,7 +77,9 @@ export default function BannerCanvas({ stageRef }) {
   const deviceFramesEnabled = useSelector(selectDeviceFramesEnabled);
   const containerRef = useRef(null);
   const layerRef = useRef(null);
-  const [scale, setScale] = useState(1);
+  const [autoFitScale, setAutoFitScale] = useState(1);
+  const [userZoom, setUserZoom] = useState(1);
+  const scale = autoFitScale * userZoom;
   const [sizeLabel, setSizeLabel] = useState(null); // {w, h, stageX, stageY}
 
   useEffect(() => {
@@ -89,13 +91,55 @@ export default function BannerCanvas({ stageRef }) {
       // Scale so the full stage (canvas + overflow on all sides) fits in container
       const totalW = canvasSize.width + OVERFLOW * 2;
       const totalH = canvasSize.height + OVERFLOW * 2;
-      setScale(Math.min(1, cw / totalW, ch / totalH));
+      setAutoFitScale(Math.min(1, cw / totalW, ch / totalH));
     }
     resize();
     const ro = new ResizeObserver(resize);
     if (containerRef.current) ro.observe(containerRef.current);
     return () => ro.disconnect();
   }, [canvasSize]);
+
+  const ZOOM_STEP = 1.25;
+  const zoomIn  = useCallback(() => setUserZoom(z => Math.min(4, parseFloat((z * ZOOM_STEP).toFixed(4)))), []);
+  const zoomOut = useCallback(() => setUserZoom(z => Math.max(1, parseFloat((z / ZOOM_STEP).toFixed(4)))), []);
+  const resetZoom = useCallback(() => setUserZoom(1), []);
+
+  // Ctrl+Wheel zoom (non-passive to allow preventDefault)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onWheel = e => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      e.deltaY < 0 ? zoomIn() : zoomOut();
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [zoomIn, zoomOut]);
+
+  // Ctrl+= / Ctrl+- / Ctrl+0 keyboard shortcuts
+  useEffect(() => {
+    const onKey = e => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      const tag = document.activeElement?.tagName;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+      if (e.key === '=' || e.key === '+') { e.preventDefault(); zoomIn(); }
+      if (e.key === '-')                  { e.preventDefault(); zoomOut(); }
+      if (e.key === '0')                  { e.preventDefault(); resetZoom(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [zoomIn, zoomOut, resetZoom]);
+
+  // Center scroll position after zoom changes
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+      el.scrollTop  = (el.scrollHeight - el.clientHeight) / 2;
+    });
+  }, [scale]);
 
   // Show size label when element is selected (idle)
   useEffect(() => {
@@ -139,6 +183,7 @@ export default function BannerCanvas({ stageRef }) {
   const previewH = Math.round((canvasSize.height + OVERFLOW * 2) * scale);
 
   return (
+    <div className="canvas-column">
     <div ref={containerRef} className="canvas-workspace">
       {/* Export stage — exact canvas size, hidden */}
       <Stage
@@ -246,6 +291,12 @@ export default function BannerCanvas({ stageRef }) {
           </div>
         )}
       </div>
+    </div>
+    <div className="zoom-bar">
+      <button className="btn btn-icon zoom-btn" onClick={zoomOut} disabled={userZoom <= 1} title="Зменшити (Ctrl+−)">−</button>
+      <button className="zoom-value" onClick={resetZoom} title="Підігнати (Ctrl+0)">{Math.round(scale * 100)}%</button>
+      <button className="btn btn-icon zoom-btn" onClick={zoomIn} disabled={userZoom >= 4} title="Збільшити (Ctrl+=)">+</button>
+    </div>
     </div>
   );
 }
