@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ChromePicker } from 'react-color';
-import { updateElementWithHistory, selectSelectedElement } from '../../store/editorSlice';
+import { pushHistory, updateElement, updateElementWithHistory, selectSelectedElement } from '../../store/editorSlice';
 import { LOCAL_FONTS, loadFont } from '../../lib/fonts';
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
@@ -11,8 +11,16 @@ export default function TextControls() {
   const [showFillPicker, setShowFillPicker] = useState(false);
   const [loadingFont, setLoadingFont] = useState(null);
 
+  // Track whether a history snapshot has been pushed for each continuous-input field.
+  // Reset whenever a different element is selected (el.id changes).
+  const historyRef = useRef({ text: false, lineHeight: false, fill: false });
+  useEffect(() => {
+    historyRef.current = { text: false, lineHeight: false, fill: false };
+  }, [el?.id]);
+
   if (!el || el.type !== 'text') return null;
 
+  // Discrete actions (button clicks) always create a history entry
   function update(changes) {
     dispatch(updateElementWithHistory({ id: el.id, ...changes }));
   }
@@ -52,7 +60,14 @@ export default function TextControls() {
       <textarea
         className="text-input text-area-small"
         value={el.text}
-        onChange={e => update({ text: e.target.value })}
+        onChange={e => {
+          // Push history once per editing session, then use no-history updates
+          if (!historyRef.current.text) {
+            dispatch(pushHistory());
+            historyRef.current.text = true;
+          }
+          dispatch(updateElement({ id: el.id, text: e.target.value }));
+        }}
         rows={2}
       />
 
@@ -82,7 +97,15 @@ export default function TextControls() {
       <input
         type="range" min="0.8" max="3" step="0.1"
         value={el.lineHeight ?? 1.2}
-        onChange={e => update({ lineHeight: parseFloat(e.target.value) })}
+        onChange={e => {
+          if (!historyRef.current.lineHeight) {
+            dispatch(pushHistory());
+            historyRef.current.lineHeight = true;
+          }
+          dispatch(updateElement({ id: el.id, lineHeight: parseFloat(e.target.value) }));
+        }}
+        onMouseUp={() => { historyRef.current.lineHeight = false; }}
+        onTouchEnd={() => { historyRef.current.lineHeight = false; }}
         className="range-input"
       />
       <div className="range-labels"><span>Щільніше</span><span>Ширше</span></div>
@@ -121,7 +144,22 @@ export default function TextControls() {
       />
       {showFillPicker && (
         <div className="color-picker-wrap">
-          <ChromePicker color={el.fill} onChange={c => update({ fill: c.hex })} disableAlpha />
+          <ChromePicker
+            color={el.fill}
+            onChange={c => {
+              if (!historyRef.current.fill) {
+                dispatch(pushHistory());
+                historyRef.current.fill = true;
+              }
+              dispatch(updateElement({ id: el.id, fill: c.hex }));
+            }}
+            onChangeComplete={c => {
+              // After the user finishes picking, commit and allow next session to push history again
+              historyRef.current.fill = false;
+              dispatch(updateElementWithHistory({ id: el.id, fill: c.hex }));
+            }}
+            disableAlpha
+          />
         </div>
       )}
 
