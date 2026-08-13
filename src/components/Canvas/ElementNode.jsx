@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { Image as KonvaImage, Text as KonvaText } from 'react-konva';
 import { useDispatch } from 'react-redux';
 import { updateElement, updateElementWithHistory, setSelectedId } from '../../store/editorSlice';
+import { resolveImage } from '../../lib/imageRegistry';
 import { useSnapGrid } from '../../hooks/useSnapGrid';
 
 function ImageNode({ el, onSelect }) {
@@ -14,13 +15,12 @@ function ImageNode({ el, onSelect }) {
     if (!el.src) return;
     const image = new window.Image();
     image.crossOrigin = 'anonymous';
-    image.src = el.src;
+    image.src = resolveImage(el.src);
     image.onload = () => {
       setImg(image);
-      // After image loads the transformer handles may need a redraw
-      // because the node's visual state changed after initial attachment.
       nodeRef.current?.getLayer()?.batchDraw();
     };
+    return () => { image.onload = null; image.src = ''; };
   }, [el.src]);
 
   return (

@@ -1,7 +1,7 @@
 import { saveAs } from 'file-saver';
 
 const DB_NAME = 'banner_constructor';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'projects';
 const LS_LEGACY_KEY = 'banner_saved_projects';
 const AUTO_SAVE_KEY = 'banner_project_v2';
@@ -12,7 +12,7 @@ export { MAX_PROJECTS };
 
 let _dbPromise = null;
 
-function getDB() {
+export function getDB() {
   if (!_dbPromise) {
     _dbPromise = new Promise((resolve, reject) => {
       const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -21,6 +21,9 @@ function getDB() {
         const db = e.target.result;
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('images')) {
+          db.createObjectStore('images', { keyPath: 'id' });
         }
       };
 

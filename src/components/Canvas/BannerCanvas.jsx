@@ -5,6 +5,7 @@ import {
   selectCanvasSize, selectBackground, selectBackgroundImage, selectElements,
   selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins, selectLogoFrameEnabled, selectDeviceFramesEnabled,
 } from '../../store/editorSlice';
+import { resolveImage } from '../../lib/imageRegistry';
 import ElementNode from './ElementNode';
 import CanvasTransformer from './CanvasTransformer';
 import { computeDeviceFrames } from '../../lib/presets';
@@ -21,8 +22,9 @@ function BgImageNode({ bgImage, interactive, dispatch }) {
     if (!bgImage.src) { setImg(null); return; }
     const image = new window.Image();
     image.crossOrigin = 'anonymous';
-    image.src = bgImage.src;
+    image.src = resolveImage(bgImage.src);
     image.onload = () => setImg(image);
+    return () => { image.onload = null; image.src = ''; };
   }, [bgImage.src]);
 
   if (!bgImage.src) return null;
@@ -135,10 +137,11 @@ export default function BannerCanvas({ stageRef }) {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    requestAnimationFrame(() => {
+    const raf = requestAnimationFrame(() => {
       el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
       el.scrollTop  = (el.scrollHeight - el.clientHeight) / 2;
     });
+    return () => cancelAnimationFrame(raf);
   }, [scale]);
 
   // Show size label when element is selected (idle)

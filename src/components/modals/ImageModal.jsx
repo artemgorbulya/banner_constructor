@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addElement, setBackgroundImage, selectCanvasSize } from '../../store/editorSlice';
+import { storeImage, resolveImage } from '../../lib/imageRegistry';
 import { LIBRARY } from '../../lib/library';
 import { X, Upload, Scissors, RotateCcw } from 'lucide-react';
 
@@ -274,10 +275,11 @@ export default function ImageModal({ mode, onClose }) {
   const [catId, setCatId] = useState(visibleCats[0]?.id ?? 'icons');
   const activeCat = visibleCats.find(c => c.id === catId) ?? visibleCats[0];
 
-  async function placeImage(src) {
+  async function placeImage(rawSrc) {
     setLoading(true);
+    const src = storeImage(rawSrc);
     try {
-      const { w, h } = await loadImageSize(src);
+      const { w, h } = await loadImageSize(resolveImage(src));
 
       if (mode === 'background') {
         const scaleX = canvasSize.width / w;
