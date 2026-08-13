@@ -48,6 +48,7 @@ export const editorSlice = createSlice({
     undoHistory(state) {
       if (!state.history.past.length) return;
       state.history.future.unshift(takeSnapshot(state));
+      if (state.history.future.length > 50) state.history.future.pop();
       applySnapshot(state, state.history.past.pop());
       if (state.selectedId && !state.elements.find(e => e.id === state.selectedId)) {
         state.selectedId = null;
@@ -184,6 +185,12 @@ export const editorSlice = createSlice({
     toggleDeviceFrames(state) {
       state.deviceFramesEnabled = !state.deviceFramesEnabled;
     },
+    // Updates only element srcs and backgroundImage src (no history, no side effects).
+    // Used on app startup to migrate old raw base64 srcs to registry IDs.
+    migrateImageSrcs(state, action) {
+      if (action.payload.elements !== undefined) state.elements = action.payload.elements;
+      if (action.payload.backgroundImage !== undefined) state.backgroundImage = action.payload.backgroundImage;
+    },
     resetProject(state) {
       Object.assign(state, { ...initialState, history: { past: [], future: [] } });
     },
@@ -206,7 +213,7 @@ export const {
   setBackgroundImage, updateBackgroundImage, clearBackgroundImage,
   addElement, prependElement, updateElement, updateElementWithHistory, deleteElement,
   reorderLayers, setSelectedId, toggleSnapGrid, toggleKeepRatio, toggleSafeArea, setSafeAreaMargins, toggleLogoFrame, toggleDeviceFrames, setCanvasSizeAndClear, setCanvasSizeAndScale,
-  resetProject, loadProject,
+  migrateImageSrcs, resetProject, loadProject,
 } = editorSlice.actions;
 
 export const selectCanvasSize = s => s.editor.canvasSize;

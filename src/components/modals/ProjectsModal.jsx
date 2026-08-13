@@ -11,6 +11,7 @@ import {
   formatProjectDate, exportProjectToFile, importProjectFromFile,
   MAX_PROJECTS,
 } from '../../lib/projects';
+import { resolveStateImages, storeStateImages } from '../../lib/imageRegistry';
 import { X, FolderOpen, Save, Trash2, ArrowLeft, AlertTriangle, Upload, FileDown } from 'lucide-react';
 
 export default function ProjectsModal({ stageRef, initialView = 'list', onAfterSave, onClose }) {
@@ -92,7 +93,8 @@ export default function ProjectsModal({ stageRef, initialView = 'list', onAfterS
 
   function handleExportJson(project, e) {
     e.stopPropagation();
-    exportProjectToFile(project.name, project.state);
+    // Resolve any registry IDs back to actual base64 so the exported file is self-contained
+    exportProjectToFile(project.name, resolveStateImages(project.state));
   }
 
   async function handleImport(e) {
@@ -100,7 +102,9 @@ export default function ProjectsModal({ stageRef, initialView = 'list', onAfterS
     if (!file) return;
     setImportError(null);
     try {
-      const { state } = await importProjectFromFile(file);
+      const { state: rawState } = await importProjectFromFile(file);
+      // Register any raw base64 images from the imported file and replace with IDs
+      const state = storeStateImages(rawState);
       dispatch(loadProject(state));
       syncAutoSave(state);
       onClose();
