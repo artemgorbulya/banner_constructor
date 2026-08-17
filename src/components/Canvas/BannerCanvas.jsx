@@ -3,7 +3,7 @@ import { Stage, Layer, Rect, Image as KonvaImage, Group } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectCanvasSize, selectBackground, selectBackgroundImage, selectElements,
-  selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins, selectLogoFrameEnabled, selectDeviceFramesEnabled,
+  selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins, selectLogoFrameEnabled, selectDeviceFramesEnabled, selectDeviceFramesLayout,
 } from '../../store/editorSlice';
 import { resolveImage } from '../../lib/imageRegistry';
 import ElementNode from './ElementNode';
@@ -77,6 +77,7 @@ export default function BannerCanvas({ stageRef }) {
   const safeAreaMargins = useSelector(selectSafeAreaMargins);
   const logoFrameEnabled = useSelector(selectLogoFrameEnabled);
   const deviceFramesEnabled = useSelector(selectDeviceFramesEnabled);
+  const deviceFramesLayout = useSelector(selectDeviceFramesLayout);
   const containerRef = useRef(null);
   const layerRef = useRef(null);
   const [autoFitScale, setAutoFitScale] = useState(1);
@@ -133,7 +134,7 @@ export default function BannerCanvas({ stageRef }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [zoomIn, zoomOut, resetZoom]);
 
-  // Center scroll position after zoom changes
+  // Center scroll position only when userZoom changes — not on window resize
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -142,7 +143,7 @@ export default function BannerCanvas({ stageRef }) {
       el.scrollTop  = (el.scrollHeight - el.clientHeight) / 2;
     });
     return () => cancelAnimationFrame(raf);
-  }, [scale]);
+  }, [userZoom]);
 
   // Show size label when element is selected (idle)
   useEffect(() => {
@@ -263,7 +264,7 @@ export default function BannerCanvas({ stageRef }) {
                     />
                   )}
                   {deviceFramesEnabled && (() => {
-                    const { frame1, frame2, size } = computeDeviceFrames(canvasSize, safeAreaMargins);
+                    const { frame1, frame2, size } = computeDeviceFrames(canvasSize, safeAreaMargins, deviceFramesLayout);
                     const commonProps = {
                       width: size, height: size,
                       stroke: '#FF0000', strokeWidth: 1,

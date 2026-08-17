@@ -8,21 +8,23 @@ const DEVICE_SIZE = 160;
 
 /**
  * Returns pixel coordinates for both device frames given canvas dimensions and safe area margins.
- * Layout is determined by the matching preset's deviceFramesLayout field;
- * custom canvas sizes fall back to 'wide' (>1200px) or 'tall'.
+ * Pass an explicit `layout` (from Redux state) to avoid ambiguity when canvas dimensions match a
+ * preset that was added after the project was created. Falls back to preset lookup, then heuristic.
  */
-export function computeDeviceFrames(canvasSize, safeAreaMargins) {
+export function computeDeviceFrames(canvasSize, safeAreaMargins, layout) {
   const rightX = canvasSize.width - safeAreaMargins.right - DEVICE_SIZE;
-  const preset = PRESETS.find(p => p.width === canvasSize.width && p.height === canvasSize.height);
-  const layout = preset?.deviceFramesLayout ?? (canvasSize.width > 1200 ? 'wide' : 'tall');
+  const resolvedLayout = layout ?? (() => {
+    const preset = PRESETS.find(p => p.width === canvasSize.width && p.height === canvasSize.height);
+    return preset?.deviceFramesLayout ?? (canvasSize.width > 1200 ? 'wide' : 'tall');
+  })();
 
   let x1 = rightX, y1, x2 = rightX, y2;
 
-  if (layout === 'wide') {
+  if (resolvedLayout === 'wide') {
     y1 = Math.round((canvasSize.height - DEVICE_SIZE) / 2);
     y2 = y1;
     x2 = rightX - 20 - DEVICE_SIZE;
-  } else if (layout === 'stacked') {
+  } else if (resolvedLayout === 'stacked') {
     y1 = safeAreaMargins.top + 20;
     y2 = y1 + DEVICE_SIZE + 8;
   } else {

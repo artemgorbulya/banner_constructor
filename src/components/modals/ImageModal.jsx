@@ -275,7 +275,7 @@ export default function ImageModal({ mode, onClose }) {
   const [catId, setCatId] = useState(visibleCats[0]?.id ?? 'icons');
   const activeCat = visibleCats.find(c => c.id === catId) ?? visibleCats[0];
 
-  async function placeImage(rawSrc) {
+  async function placeImage(rawSrc, name) {
     setLoading(true);
     const src = storeImage(rawSrc);
     try {
@@ -305,7 +305,7 @@ export default function ImageModal({ mode, onClose }) {
           x: Math.round((canvasSize.width - fw) / 2),
           y: Math.round((canvasSize.height - fh) / 2),
           width: fw, height: fh,
-          name: 'Зображення',
+          name: name || 'Зображення',
         }));
       }
       onClose();
@@ -315,11 +315,15 @@ export default function ImageModal({ mode, onClose }) {
     }
   }
 
+  function fileBaseName(file) {
+    return file.name.replace(/\.[^.]+$/, '');
+  }
+
   function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => placeImage(ev.target.result);
+    reader.onload = ev => placeImage(ev.target.result, fileBaseName(file));
     reader.readAsDataURL(file);
   }
 
@@ -329,7 +333,7 @@ export default function ImageModal({ mode, onClose }) {
     const file = e.dataTransfer.files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
-    reader.onload = ev => placeImage(ev.target.result);
+    reader.onload = ev => placeImage(ev.target.result, fileBaseName(file));
     reader.readAsDataURL(file);
   }
 
@@ -338,7 +342,8 @@ export default function ImageModal({ mode, onClose }) {
     if (!raw) return;
     setUrlError('');
     const src = raw.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(raw)}` : raw;
-    placeImage(src);
+    const urlName = raw.split('/').pop().split('?')[0].replace(/\.[^.]+$/, '') || 'Зображення';
+    placeImage(src, urlName);
   }
 
   return (
@@ -422,7 +427,7 @@ export default function ImageModal({ mode, onClose }) {
                     <button
                       key={item.name}
                       className="library-item"
-                      onClick={() => placeImage(item.src)}
+                      onClick={() => placeImage(item.src, item.name)}
                       onMouseEnter={e => showPreview(e, item.src)}
                       onMouseLeave={() => setLibPreview(null)}
                     >
