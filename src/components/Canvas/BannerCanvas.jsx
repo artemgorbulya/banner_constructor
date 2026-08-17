@@ -203,6 +203,9 @@ export default function BannerCanvas({ stageRef }) {
         </Layer>
       </Stage>
 
+      {/* Inner centering wrapper: flex centers the stage when it fits;
+          min-width/min-height make it grow when zoomed so the outer container scrolls */}
+      <div className="canvas-workspace-inner">
       {/* Preview stage wrapped in relative div so tooltip can be positioned over it */}
       <div style={{ position: 'relative', flexShrink: 0 }}>
         <Stage
@@ -295,6 +298,7 @@ export default function BannerCanvas({ stageRef }) {
           </div>
         )}
       </div>
+      </div>{/* /canvas-workspace-inner */}
     </div>
     <div className="zoom-bar">
       <button className="btn btn-icon zoom-btn" onClick={zoomOut} disabled={userZoom <= 1} title="Зменшити (Ctrl+−)">−</button>
