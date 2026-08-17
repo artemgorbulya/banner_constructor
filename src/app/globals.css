@@ -161,11 +161,29 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
 }
 
 /* ─── Canvas workspace ───────────────────────────────────── */
+/*
+ * Outer container: plain block scroll container — NO display:flex here.
+ * flex + justify-content:center + overflow:auto causes the "inaccessible left/top"
+ * bug: centered overflow puts content at negative scroll offsets that are unreachable.
+ */
 .canvas-workspace {
   flex: 1; min-height: 0; overflow: auto; background: var(--workspace);
-  display: flex; align-items: center; justify-content: center;
-  padding: 40px;
 }
+/*
+ * Inner wrapper: handles centering when stage fits; grows naturally when stage
+ * is larger (zoom > 1) so the outer container can scroll to every corner.
+ */
+.canvas-workspace-inner {
+  min-width: 100%; min-height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px; box-sizing: border-box;
+}
+/* Custom scrollbars — always visible on macOS (native overlay bars auto-hide) */
+.canvas-workspace::-webkit-scrollbar { width: 8px; height: 8px; }
+.canvas-workspace::-webkit-scrollbar-track { background: transparent; }
+.canvas-workspace::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.canvas-workspace::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+.canvas-workspace::-webkit-scrollbar-corner { background: transparent; }
 
 /* ─── Modals ─────────────────────────────────────────────── */
 .modal-overlay {
