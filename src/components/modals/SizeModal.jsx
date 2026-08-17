@@ -56,18 +56,20 @@ export default function SizeModal({ onClose }) {
       left: parseMargin(margins.left, 20),
     };
 
+    const matchedPreset = PRESETS.find(p => p.width === width && p.height === height);
+    const deviceFramesLayout = matchedPreset?.deviceFramesLayout ?? (width > 1200 ? 'wide' : 'tall');
+    const newSize = { width, height, deviceFramesLayout };
+
     const sizeChanged = width !== current.width || height !== current.height;
     const hasContent = elements.length > 0 || !!backgroundImage.src;
 
     if (sizeChanged && hasContent) {
-      setResizeConfirm({ newSize: { width, height }, newMargins });
+      setResizeConfirm({ newSize, newMargins });
       return;
     }
 
-    // Size changed but no content — just apply without clearing
-    // Size unchanged — only update margins (and canvasSize in case min was applied)
     if (sizeChanged) {
-      dispatch(setCanvasSizeAndClear({ width, height }));
+      dispatch(setCanvasSizeAndClear(newSize));
     } else {
       dispatch(setCanvasSize({ width, height }));
     }

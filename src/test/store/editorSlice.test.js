@@ -243,6 +243,33 @@ describe('setCanvasSizeAndClear', () => {
     expect(s.backgroundImage.src).toBeNull();
     expect(s.selectedId).toBeNull();
   });
+
+  it('stores explicit deviceFramesLayout from payload', () => {
+    const s = reducer(state(), setCanvasSizeAndClear({ width: 700, height: 465, deviceFramesLayout: 'stacked' }));
+    expect(s.deviceFramesLayout).toBe('stacked');
+  });
+
+  it('computes wide layout when width > 1200 and no explicit layout', () => {
+    const s = reducer(state(), setCanvasSizeAndClear({ width: 1536, height: 256 }));
+    expect(s.deviceFramesLayout).toBe('wide');
+  });
+
+  it('computes tall layout when width ≤ 1200 and no explicit layout', () => {
+    const s = reducer(state(), setCanvasSizeAndClear({ width: 700, height: 465 }));
+    expect(s.deviceFramesLayout).toBe('tall');
+  });
+});
+
+describe('setCanvasSizeAndScale — deviceFramesLayout', () => {
+  it('stores explicit deviceFramesLayout from payload', () => {
+    const s = reducer(state(), setCanvasSizeAndScale({ width: 700, height: 465, deviceFramesLayout: 'stacked' }));
+    expect(s.deviceFramesLayout).toBe('stacked');
+  });
+
+  it('computes layout from width when not provided', () => {
+    const s = reducer(state(), setCanvasSizeAndScale({ width: 1400, height: 400 }));
+    expect(s.deviceFramesLayout).toBe('wide');
+  });
 });
 
 // ─── Background ──────────────────────────────────────────────────────────────
@@ -344,6 +371,22 @@ describe('loadProject', () => {
   it('falls back for missing elements', () => {
     const s = reducer(state(), loadProject({ canvasSize: { width: 880, height: 408 } }));
     expect(s.elements).toEqual([]);
+  });
+
+  it('restores deviceFramesLayout when explicitly saved', () => {
+    const s = reducer(state(), loadProject({ canvasSize: { width: 700, height: 465 }, elements: [], deviceFramesLayout: 'stacked' }));
+    expect(s.deviceFramesLayout).toBe('stacked');
+  });
+
+  it('falls back to width-based heuristic (no preset lookup) for old projects without saved layout', () => {
+    // 700×465 previously fell into the non-wide fallback ('tall') before Promo Banner preset existed
+    const s = reducer(state(), loadProject({ canvasSize: { width: 700, height: 465 }, elements: [] }));
+    expect(s.deviceFramesLayout).toBe('tall');
+  });
+
+  it('falls back to wide for old projects with width > 1200', () => {
+    const s = reducer(state(), loadProject({ canvasSize: { width: 1536, height: 256 }, elements: [] }));
+    expect(s.deviceFramesLayout).toBe('wide');
   });
 });
 
