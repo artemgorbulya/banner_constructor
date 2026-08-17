@@ -5,6 +5,7 @@ import {
   setSelectedId, deleteElement, updateElement, reorderLayers, clearBackgroundImage,
 } from '../../store/editorSlice';
 import { Type, Eye, EyeOff, X, Lock } from 'lucide-react';
+import { resolveImage } from '../../lib/imageRegistry';
 
 const BG_ID = '__bg_image__';
 
@@ -54,7 +55,7 @@ export default function LayersPanel() {
             onDragOver={handleDragOver}
           >
             {el.type === 'image' && el.src
-              ? <img className="layer-thumb" src={el.src} alt="" draggable={false} />
+              ? <img className="layer-thumb" src={resolveImage(el.src)} alt="" draggable={false} />
               : <span className="layer-icon"><Type size={14} /></span>
             }
             <span className="layer-name">{el.name || (el.type === 'text' ? 'Текст' : 'Зображення')}</span>
@@ -81,7 +82,7 @@ export default function LayersPanel() {
             onClick={() => dispatch(setSelectedId(BG_ID))}
             title="Фон — завжди знизу"
           >
-            <img className="layer-thumb" src={backgroundImage.src} alt="" draggable={false} />
+            <img className="layer-thumb" src={resolveImage(backgroundImage.src)} alt="" draggable={false} />
             <span className="layer-name">Фон (зображення)</span>
             <div className="layer-actions">
               <span className="layer-lock" title="Завжди знизу"><Lock size={14} /></span>
