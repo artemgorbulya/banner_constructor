@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const initialState = {
   canvasSize: { width: 880, height: 408 },
+  deviceFramesLayout: 'tall',
   background: { color: '#ffffff' },
   backgroundImage: { src: null, x: 0, y: 0, width: 0, height: 0, rotation: 0 },
   elements: [],
@@ -22,6 +23,7 @@ function takeSnapshot(state) {
     background: state.background,
     backgroundImage: state.backgroundImage,
     canvasSize: state.canvasSize,
+    deviceFramesLayout: state.deviceFramesLayout,
   }));
 }
 
@@ -36,6 +38,7 @@ function applySnapshot(state, snap) {
   state.background = snap.background;
   state.backgroundImage = snap.backgroundImage;
   state.canvasSize = snap.canvasSize;
+  state.deviceFramesLayout = snap.deviceFramesLayout ?? 'tall';
 }
 
 export const editorSlice = createSlice({
@@ -66,7 +69,9 @@ export const editorSlice = createSlice({
     },
     setCanvasSizeAndClear(state, action) {
       pushSnap(state);
-      state.canvasSize = action.payload;
+      const { width, height, deviceFramesLayout } = action.payload;
+      state.canvasSize = { width, height };
+      state.deviceFramesLayout = deviceFramesLayout ?? (width > 1200 ? 'wide' : 'tall');
       state.elements = [];
       state.background = { color: '#ffffff' };
       state.backgroundImage = { src: null, x: 0, y: 0, width: 0, height: 0, rotation: 0 };
@@ -74,7 +79,8 @@ export const editorSlice = createSlice({
     },
     setCanvasSizeAndScale(state, action) {
       pushSnap(state);
-      const { width, height } = action.payload;
+      const { width, height, deviceFramesLayout } = action.payload;
+      state.deviceFramesLayout = deviceFramesLayout ?? (width > 1200 ? 'wide' : 'tall');
       const sx = width / state.canvasSize.width;
       const sy = height / state.canvasSize.height;
 
@@ -195,8 +201,11 @@ export const editorSlice = createSlice({
       Object.assign(state, { ...initialState, history: { past: [], future: [] } });
     },
     loadProject(state, action) {
-      const { canvasSize, background, backgroundImage, elements, safeAreaMargins } = action.payload;
+      const { canvasSize, background, backgroundImage, elements, safeAreaMargins, deviceFramesLayout } = action.payload;
       state.canvasSize = canvasSize;
+      // Prefer explicit stored value; fall back to the old width-based heuristic (no preset lookup)
+      // so projects saved before the Promo Banner preset keep their original layout
+      state.deviceFramesLayout = deviceFramesLayout ?? (canvasSize.width > 1200 ? 'wide' : 'tall');
       state.background = background ?? { color: '#ffffff' };
       state.backgroundImage = backgroundImage ?? { src: null, x: 0, y: 0, width: 0, height: 0, rotation: 0 };
       state.elements = elements ?? [];
@@ -217,6 +226,7 @@ export const {
 } = editorSlice.actions;
 
 export const selectCanvasSize = s => s.editor.canvasSize;
+export const selectDeviceFramesLayout = s => s.editor.deviceFramesLayout;
 export const selectBackground = s => s.editor.background;
 export const selectBackgroundImage = s => s.editor.backgroundImage;
 export const selectElements = s => s.editor.elements;

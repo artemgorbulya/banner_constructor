@@ -145,3 +145,34 @@ describe('computeDeviceFrames — custom canvas fallback', () => {
     expect(frame1.x).toBe(frame2.x);
   });
 });
+
+// ─── computeDeviceFrames — explicit layout parameter ─────────────────────────
+
+describe('computeDeviceFrames — explicit layout parameter', () => {
+  // Regression: a 700×465 canvas created before the Promo Banner preset was added
+  // must keep 'tall' layout (old default) and not be matched to 'stacked' by preset lookup.
+  it('700×465 with explicit tall layout uses tall, not stacked', () => {
+    const canvas = { width: 700, height: 465 };
+    const margins = { top: 36, right: 43, bottom: 30, left: 20 };
+    const { frame1, frame2 } = computeDeviceFrames(canvas, margins, 'tall');
+    // tall: frame1 at safe area top, frame2 at safe area bottom
+    expect(frame1.y).toBe(margins.top);
+    expect(frame2.y + 160).toBe(canvas.height - margins.bottom);
+  });
+
+  it('explicit wide layout overrides preset lookup for any canvas size', () => {
+    const canvas = { width: 880, height: 408 };
+    const margins = { top: 24, right: 32, bottom: 48, left: 32 };
+    const { frame1, frame2, size } = computeDeviceFrames(canvas, margins, 'wide');
+    expect(frame1.y).toBe(frame2.y);
+    expect(frame1.y).toBe(Math.round((canvas.height - size) / 2));
+  });
+
+  it('explicit stacked layout overrides preset lookup for any canvas size', () => {
+    const canvas = { width: 880, height: 408 };
+    const margins = { top: 24, right: 32, bottom: 48, left: 32 };
+    const { frame1, frame2, size } = computeDeviceFrames(canvas, margins, 'stacked');
+    expect(frame1.y).toBe(margins.top + 20);
+    expect(frame2.y).toBe(frame1.y + size + 8);
+  });
+});
