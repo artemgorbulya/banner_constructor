@@ -25,7 +25,6 @@ export function useLocalStorageSave() {
       }
     }, DEBOUNCE_MS);
     return () => clearTimeout(timerRef.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasSize, background, backgroundImage, elements, safeAreaMargins]);
 
   return { quotaExceeded };
