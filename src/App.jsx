@@ -3,7 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { store } from './store';
-import { selectElements, selectBackgroundImage, selectSelectedElement, migrateImageSrcs } from './store/editorSlice';
+import { selectElements, selectBackgroundImage, selectSelectedElement, migrateImageSrcs, bumpRegistryVersion } from './store/editorSlice';
 import { initImageRegistry, storeImage } from './lib/imageRegistry';
 import { useKeyboard } from './hooks/useKeyboard';
 import { useLocalStorageSave } from './hooks/useLocalStorage';
@@ -43,6 +43,8 @@ function EditorInner() {
           : backgroundImage;
         dispatch(migrateImageSrcs({ elements: newElements, backgroundImage: newBg }));
       }
+      // Always bump after IDB loads so ImageNode/BgImageNode re-resolve img_<uuid> IDs
+      dispatch(bumpRegistryVersion());
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally run once on mount only

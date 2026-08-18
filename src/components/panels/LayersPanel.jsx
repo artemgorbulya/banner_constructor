@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   selectElements, selectSelectedId, selectBackgroundImage,
   setSelectedId, deleteElement, updateElement, reorderLayers, clearBackgroundImage,
+  selectRegistryVersion,
 } from '../../store/editorSlice';
 import { Type, Eye, EyeOff, X, Lock } from 'lucide-react';
 import { resolveImage } from '../../lib/imageRegistry';
@@ -14,6 +15,7 @@ export default function LayersPanel() {
   const elements = useSelector(selectElements);
   const selectedId = useSelector(selectSelectedId);
   const backgroundImage = useSelector(selectBackgroundImage);
+  useSelector(selectRegistryVersion); // re-render when IDB registry becomes ready
   const dragEl = useRef(null);
 
   const reversed = [...elements].reverse();

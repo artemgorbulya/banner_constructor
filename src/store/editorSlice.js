@@ -15,6 +15,9 @@ const initialState = {
   logoFrameEnabled: true,
   deviceFramesEnabled: true,
   history: { past: [], future: [] },
+  // Incremented once after initImageRegistry() resolves so ImageNode/BgImageNode
+  // useEffects re-run and resolve img_<uuid> IDs that were unresolvable on first render.
+  registryVersion: 0,
 };
 
 function takeSnapshot(state) {
@@ -197,6 +200,9 @@ export const editorSlice = createSlice({
       if (action.payload.elements !== undefined) state.elements = action.payload.elements;
       if (action.payload.backgroundImage !== undefined) state.backgroundImage = action.payload.backgroundImage;
     },
+    bumpRegistryVersion(state) {
+      state.registryVersion += 1;
+    },
     resetProject(state) {
       Object.assign(state, { ...initialState, history: { past: [], future: [] } });
     },
@@ -222,7 +228,7 @@ export const {
   setBackgroundImage, updateBackgroundImage, clearBackgroundImage,
   addElement, prependElement, updateElement, updateElementWithHistory, deleteElement,
   reorderLayers, setSelectedId, toggleSnapGrid, toggleKeepRatio, toggleSafeArea, setSafeAreaMargins, toggleLogoFrame, toggleDeviceFrames, setCanvasSizeAndClear, setCanvasSizeAndScale,
-  migrateImageSrcs, resetProject, loadProject,
+  migrateImageSrcs, bumpRegistryVersion, resetProject, loadProject,
 } = editorSlice.actions;
 
 export const selectCanvasSize = s => s.editor.canvasSize;
@@ -241,5 +247,6 @@ export const selectLogoFrameEnabled = s => s.editor.logoFrameEnabled;
 export const selectDeviceFramesEnabled = s => s.editor.deviceFramesEnabled;
 export const selectCanUndo = s => s.editor.history.past.length > 0;
 export const selectCanRedo = s => s.editor.history.future.length > 0;
+export const selectRegistryVersion = s => s.editor.registryVersion;
 
 export default editorSlice.reducer;
