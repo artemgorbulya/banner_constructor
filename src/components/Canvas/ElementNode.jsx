@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { Image as KonvaImage, Text as KonvaText } from 'react-konva';
-import { useDispatch } from 'react-redux';
-import { updateElement, updateElementWithHistory, setSelectedId } from '../../store/editorSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateElement, updateElementWithHistory, setSelectedId, selectRegistryVersion } from '../../store/editorSlice';
 import { resolveImage } from '../../lib/imageRegistry';
 import { useSnapGrid } from '../../hooks/useSnapGrid';
 
@@ -10,6 +10,7 @@ function ImageNode({ el, onSelect }) {
   const snap = useSnapGrid();
   const [img, setImg] = useState(null);
   const nodeRef = useRef(null);
+  const registryVersion = useSelector(selectRegistryVersion);
 
   useEffect(() => {
     if (!el.src) return;
@@ -21,7 +22,7 @@ function ImageNode({ el, onSelect }) {
       nodeRef.current?.getLayer()?.batchDraw();
     };
     return () => { image.onload = null; image.src = ''; };
-  }, [el.src]);
+  }, [el.src, registryVersion]);
 
   return (
     <KonvaImage
