@@ -3,7 +3,7 @@ import { Stage, Layer, Rect, Image as KonvaImage, Group } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectCanvasSize, selectBackground, selectBackgroundImage, selectElements,
-  selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins, selectLogoFrameEnabled, selectDeviceFramesEnabled, selectDeviceFramesLayout,
+  selectSelectedId, setSelectedId, updateBackgroundImage, selectSafeAreaEnabled, selectSafeAreaMargins, selectLogoFrameEnabled, selectDeviceFramesEnabled, selectDeviceFramesLayout, selectRegistryVersion,
 } from '../../store/editorSlice';
 import { resolveImage } from '../../lib/imageRegistry';
 import ElementNode from './ElementNode';
@@ -17,6 +17,7 @@ const OVERFLOW = 150;
 
 function BgImageNode({ bgImage, interactive, dispatch }) {
   const [img, setImg] = useState(null);
+  const registryVersion = useSelector(selectRegistryVersion);
 
   useEffect(() => {
     if (!bgImage.src) { setImg(null); return; }
@@ -25,7 +26,7 @@ function BgImageNode({ bgImage, interactive, dispatch }) {
     image.src = resolveImage(bgImage.src);
     image.onload = () => setImg(image);
     return () => { image.onload = null; image.src = ''; };
-  }, [bgImage.src]);
+  }, [bgImage.src, registryVersion]);
 
   if (!bgImage.src) return null;
 
