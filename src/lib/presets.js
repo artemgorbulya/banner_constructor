@@ -1,5 +1,6 @@
 export const PRESETS = [
   { label: 'Billboard',   width: 1536, height: 256, margins: { top: 16, right: 176, bottom: 30, left: 176 }, deviceFramesLayout: 'wide' },
+  { label: 'Slim Banner', width: 1600, height: 200, margins: { top: 20, right: 89,  bottom: 20, left: 90  }, deviceFramesLayout: 'wide' },
   { label: 'Web Banner',  width: 880,  height: 408, margins: { top: 24, right: 32,  bottom: 48, left: 32  }, deviceFramesLayout: 'tall' },
   { label: 'Promo Banner',width: 700,  height: 465, margins: { top: 36, right: 43,  bottom: 30, left: 20  }, deviceFramesLayout: 'stacked' },
 ];

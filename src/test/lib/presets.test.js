@@ -4,8 +4,8 @@ import { PRESETS, computeDeviceFrames } from '../../lib/presets';
 // ─── PRESETS structure ────────────────────────────────────────────────────────
 
 describe('PRESETS', () => {
-  it('contains exactly 3 presets', () => {
-    expect(PRESETS).toHaveLength(3);
+  it('contains exactly 4 presets', () => {
+    expect(PRESETS).toHaveLength(4);
   });
 
   it('each preset has required fields', () => {
@@ -16,6 +16,15 @@ describe('PRESETS', () => {
       expect(p.margins).toMatchObject({ top: expect.any(Number), right: expect.any(Number), bottom: expect.any(Number), left: expect.any(Number) });
       expect(['wide', 'tall', 'stacked']).toContain(p.deviceFramesLayout);
     }
+  });
+
+  it('Slim Banner preset is 1600×200 with correct margins and wide layout', () => {
+    const p = PRESETS.find(p => p.label === 'Slim Banner');
+    expect(p).toBeDefined();
+    expect(p.width).toBe(1600);
+    expect(p.height).toBe(200);
+    expect(p.deviceFramesLayout).toBe('wide');
+    expect(p.margins).toEqual({ top: 20, right: 89, bottom: 20, left: 90 });
   });
 
   it('Billboard preset is 1536×256 with wide layout', () => {
@@ -123,6 +132,33 @@ describe('computeDeviceFrames — stacked layout (Promo Banner 700×465)', () =>
   it('both frames are within the canvas height', () => {
     const { frame2, size } = computeDeviceFrames(canvas, margins);
     expect(frame2.y + size).toBeLessThanOrEqual(canvas.height);
+  });
+});
+
+describe('computeDeviceFrames — wide layout (Slim Banner 1600×200)', () => {
+  const canvas = { width: 1600, height: 200 };
+  const margins = { top: 20, right: 89, bottom: 20, left: 90 };
+
+  it('both frames are side by side at the same y', () => {
+    const { frame1, frame2 } = computeDeviceFrames(canvas, margins);
+    expect(frame1.y).toBe(frame2.y);
+  });
+
+  it('frames fill the entire safe area height (device size = safe area height)', () => {
+    const { frame1, size } = computeDeviceFrames(canvas, margins);
+    const safeAreaHeight = canvas.height - margins.top - margins.bottom;
+    expect(size).toBe(safeAreaHeight);
+    expect(frame1.y).toBe(margins.top);
+  });
+
+  it('frame1 right edge is flush with right safe area boundary', () => {
+    const { frame1, size } = computeDeviceFrames(canvas, margins);
+    expect(frame1.x + size).toBe(canvas.width - margins.right);
+  });
+
+  it('frame2 is 20px to the left of frame1', () => {
+    const { frame1, frame2, size } = computeDeviceFrames(canvas, margins);
+    expect(frame1.x - frame2.x).toBe(size + 20);
   });
 });
 
