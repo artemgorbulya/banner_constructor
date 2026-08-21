@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addElement, setBackground, pushHistory, selectBackground, selectBackgroundImage, selectCanvasSize } from '../../store/editorSlice';
+import { addElement, setBackground, pushHistory, selectBackground, selectBackgroundImage, selectCanvasSize, selectRegistryVersion } from '../../store/editorSlice';
+import { resolveImage } from '../../lib/imageRegistry';
 import ImageModal from '../modals/ImageModal';
 import AiGenerateModal from '../modals/AiGenerateModal';
 import { ChromePicker } from 'react-color';
@@ -11,6 +12,7 @@ export default function AddPanel() {
   const canvasSize = useSelector(selectCanvasSize);
   const background = useSelector(selectBackground);
   const backgroundImage = useSelector(selectBackgroundImage);
+  useSelector(selectRegistryVersion); // re-render when IDB registry becomes ready
   const [showImageModal, setShowImageModal] = useState(false);
   const [showBgModal, setShowBgModal] = useState(false);
   const [showBgColor, setShowBgColor] = useState(false);
@@ -72,7 +74,7 @@ export default function AddPanel() {
             onClick={() => setShowBgModal(true)}
           >
             {backgroundImage.src
-              ? <img src={backgroundImage.src} className="bg-thumb" alt="фон" />
+              ? <img src={resolveImage(backgroundImage.src)} className="bg-thumb" alt="фон" />
               : <span className="add-btn-icon"><Wallpaper size={18} /></span>
             }
             <span>Зображення</span>
