@@ -8,7 +8,7 @@ import {
 import { resolveImage } from '../../lib/imageRegistry';
 import ElementNode from './ElementNode';
 import CanvasTransformer from './CanvasTransformer';
-import { computeDeviceFrames } from '../../lib/presets';
+import { computeDeviceFrames, PRESETS } from '../../lib/presets';
 
 const BG_ID = '__bg_image__';
 // Extra canvas-space pixels around the banner so Transformer handles
@@ -253,22 +253,28 @@ export default function BannerCanvas({ stageRef }) {
                     listening={false}
                     perfectDrawEnabled={false}
                   />
-                  {logoFrameEnabled && (
-                    <Rect
-                      x={safeAreaMargins.left}
-                      y={safeAreaMargins.top}
-                      width={210}
-                      height={70}
-                      stroke="#FF0000"
-                      strokeWidth={1}
-                      strokeScaleEnabled={false}
-                      dash={[8, 5]}
-                      listening={false}
-                      perfectDrawEnabled={false}
-                    />
-                  )}
+                  {logoFrameEnabled && (() => {
+                    const p = PRESETS.find(p => p.width === canvasSize.width && p.height === canvasSize.height);
+                    const lw = p?.logoFrameSize?.width ?? 210;
+                    const lh = p?.logoFrameSize?.height ?? 70;
+                    return (
+                      <Rect
+                        x={safeAreaMargins.left}
+                        y={safeAreaMargins.top}
+                        width={lw}
+                        height={lh}
+                        stroke="#FF0000"
+                        strokeWidth={1}
+                        strokeScaleEnabled={false}
+                        dash={[8, 5]}
+                        listening={false}
+                        perfectDrawEnabled={false}
+                      />
+                    );
+                  })()}
                   {deviceFramesEnabled && (() => {
-                    const { frame1, frame2, size } = computeDeviceFrames(canvasSize, safeAreaMargins, deviceFramesLayout);
+                    const p = PRESETS.find(pr => pr.width === canvasSize.width && pr.height === canvasSize.height);
+                    const { frame1, frame2, size } = computeDeviceFrames(canvasSize, safeAreaMargins, deviceFramesLayout, p?.deviceSize);
                     const commonProps = {
                       width: size, height: size,
                       stroke: '#FF0000', strokeWidth: 1,
@@ -278,7 +284,7 @@ export default function BannerCanvas({ stageRef }) {
                     return (
                       <>
                         <Rect x={frame1.x} y={frame1.y} {...commonProps} />
-                        <Rect x={frame2.x} y={frame2.y} {...commonProps} />
+                        {frame2 && <Rect x={frame2.x} y={frame2.y} {...commonProps} />}
                       </>
                     );
                   })()}
