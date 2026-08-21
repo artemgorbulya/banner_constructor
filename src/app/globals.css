@@ -493,6 +493,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
   font-size: 12px; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
 }
+.project-size { font-size: 10px; color: var(--text-muted); margin-bottom: 1px; }
 .project-date { font-size: 10px; color: var(--text-muted); }
 
 .project-export-btn, .project-delete-btn {
