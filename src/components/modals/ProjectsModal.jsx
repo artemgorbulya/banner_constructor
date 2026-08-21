@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   loadProject,
   selectCanvasSize, selectBackground, selectBackgroundImage,
-  selectElements, selectSafeAreaMargins,
+  selectElements, selectSafeAreaMargins, selectDeviceFramesLayout,
 } from '../../store/editorSlice';
 import {
   loadProjects, saveNewProject, deleteProject,
@@ -21,8 +21,9 @@ export default function ProjectsModal({ stageRef, initialView = 'list', onAfterS
   const backgroundImage = useSelector(selectBackgroundImage);
   const elements = useSelector(selectElements);
   const safeAreaMargins = useSelector(selectSafeAreaMargins);
+  const deviceFramesLayout = useSelector(selectDeviceFramesLayout);
 
-  const currentState = { canvasSize, background, backgroundImage, elements, safeAreaMargins };
+  const currentState = { canvasSize, background, backgroundImage, elements, safeAreaMargins, deviceFramesLayout };
 
   const [view, setView] = useState(initialView);
   const [projects, setProjects] = useState([]);
@@ -234,6 +235,9 @@ export default function ProjectsModal({ stageRef, initialView = 'list', onAfterS
                   </div>
                   <div className="project-info">
                     <div className="project-name" title={p.name}>{p.name}</div>
+                    {p.state?.canvasSize && (
+                      <div className="project-size">{p.state.canvasSize.width}×{p.state.canvasSize.height}</div>
+                    )}
                     <div className="project-date">{formatProjectDate(p.savedAt)}</div>
                   </div>
                   <button

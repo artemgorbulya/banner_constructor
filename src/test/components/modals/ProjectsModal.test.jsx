@@ -126,4 +126,32 @@ describe('ProjectsModal — save view', () => {
     await user.type(screen.getByPlaceholderText('Без назви'), 'Enter Save{Enter}');
     await waitFor(() => expect(projectsLib.saveNewProject).toHaveBeenCalled());
   });
+
+  it('saved state includes deviceFramesLayout field', async () => {
+    const user = userEvent.setup();
+    renderModal({ initialView: 'save' });
+    await waitFor(() => screen.getByPlaceholderText('Без назви'));
+    await user.type(screen.getByPlaceholderText('Без назви'), 'Test');
+    await user.click(screen.getByText('Зберегти'));
+    await waitFor(() => expect(projectsLib.saveNewProject).toHaveBeenCalledWith(
+      'Test',
+      expect.objectContaining({ deviceFramesLayout: expect.any(String) }),
+      expect.anything()
+    ));
+  });
+});
+
+describe('ProjectsModal — canvas size display on project cards', () => {
+  it('shows canvas dimensions on project card', async () => {
+    await projectsLib.saveNewProject('Banner', { canvasSize: { width: 780, height: 130 } }, null);
+    renderModal();
+    await waitFor(() => expect(screen.getByText('780×130')).toBeInTheDocument());
+  });
+
+  it('does not crash and hides size line when project has no canvasSize', async () => {
+    await projectsLib.saveNewProject('Legacy', {}, null);
+    renderModal();
+    await waitFor(() => expect(screen.getByText('Legacy')).toBeInTheDocument());
+    expect(screen.queryByText(/\d+×\d+/)).not.toBeInTheDocument();
+  });
 });

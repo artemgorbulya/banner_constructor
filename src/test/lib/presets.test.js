@@ -4,8 +4,8 @@ import { PRESETS, computeDeviceFrames } from '../../lib/presets';
 // ─── PRESETS structure ────────────────────────────────────────────────────────
 
 describe('PRESETS', () => {
-  it('contains exactly 4 presets', () => {
-    expect(PRESETS).toHaveLength(4);
+  it('contains exactly 5 presets', () => {
+    expect(PRESETS).toHaveLength(5);
   });
 
   it('each preset has required fields', () => {
@@ -14,8 +14,19 @@ describe('PRESETS', () => {
       expect(p).toHaveProperty('width');
       expect(p).toHaveProperty('height');
       expect(p.margins).toMatchObject({ top: expect.any(Number), right: expect.any(Number), bottom: expect.any(Number), left: expect.any(Number) });
-      expect(['wide', 'tall', 'stacked']).toContain(p.deviceFramesLayout);
+      expect(['wide', 'tall', 'stacked', 'single']).toContain(p.deviceFramesLayout);
     }
+  });
+
+  it('Super Slim preset is 780×130 with single layout, custom logo and device frame sizes', () => {
+    const p = PRESETS.find(p => p.label === 'Super Slim');
+    expect(p).toBeDefined();
+    expect(p.width).toBe(780);
+    expect(p.height).toBe(130);
+    expect(p.deviceFramesLayout).toBe('single');
+    expect(p.margins).toEqual({ top: 14, right: 34, bottom: 14, left: 34 });
+    expect(p.logoFrameSize).toEqual({ width: 155, height: 50 });
+    expect(p.deviceSize).toBe(124);
   });
 
   it('Slim Banner preset is 1600×200 with correct margins and wide layout', () => {
@@ -159,6 +170,55 @@ describe('computeDeviceFrames — wide layout (Slim Banner 1600×200)', () => {
   it('frame2 is 20px to the left of frame1', () => {
     const { frame1, frame2, size } = computeDeviceFrames(canvas, margins);
     expect(frame1.x - frame2.x).toBe(size + 20);
+  });
+});
+
+describe('computeDeviceFrames — single layout (Super Slim 780×130)', () => {
+  const canvas = { width: 780, height: 130 };
+  const margins = { top: 14, right: 34, bottom: 14, left: 34 };
+  const deviceSize = 124;
+
+  it('frame2 is null (only one device frame)', () => {
+    const { frame2 } = computeDeviceFrames(canvas, margins, 'single', deviceSize);
+    expect(frame2).toBeNull();
+  });
+
+  it('frame1 right edge is flush with right safe area boundary', () => {
+    const { frame1, size } = computeDeviceFrames(canvas, margins, 'single', deviceSize);
+    expect(frame1.x + size).toBe(canvas.width - margins.right);
+  });
+
+  it('frame1 is centered vertically within the safe area', () => {
+    const { frame1, size } = computeDeviceFrames(canvas, margins, 'single', deviceSize);
+    const safeH = canvas.height - margins.top - margins.bottom;
+    const expectedY = margins.top + Math.round((safeH - size) / 2);
+    expect(frame1.y).toBe(expectedY);
+  });
+
+  it('frame1 extends beyond safe area (device taller than safe area)', () => {
+    const { frame1, size } = computeDeviceFrames(canvas, margins, 'single', deviceSize);
+    const safeH = canvas.height - margins.top - margins.bottom;
+    expect(size).toBeGreaterThan(safeH);
+    expect(frame1.y).toBeLessThan(margins.top);
+  });
+});
+
+describe('computeDeviceFrames — auto-detect Super Slim (780×130, no explicit layout)', () => {
+  const canvas = { width: 780, height: 130 };
+  const margins = { top: 14, right: 34, bottom: 14, left: 34 };
+
+  it('resolves to single layout via preset lookup and returns frame2: null', () => {
+    const { frame2 } = computeDeviceFrames(canvas, margins);
+    expect(frame2).toBeNull();
+  });
+
+  it('with explicit deviceSize 124 frame1 x/y are correct', () => {
+    const { frame1, frame2, size } = computeDeviceFrames(canvas, margins, undefined, 124);
+    expect(size).toBe(124);
+    expect(frame2).toBeNull();
+    expect(frame1.x + size).toBe(canvas.width - margins.right); // flush with right safe area
+    const safeH = canvas.height - margins.top - margins.bottom;
+    expect(frame1.y).toBe(margins.top + Math.round((safeH - 124) / 2));
   });
 });
 

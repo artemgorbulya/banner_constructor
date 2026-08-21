@@ -8,7 +8,7 @@ import reducer, {
   setBackgroundImage, clearBackgroundImage,
   toggleSafeArea, toggleLogoFrame, toggleDeviceFrames,
   setSafeAreaMargins, setSelectedId,
-  resetProject, loadProject,
+  resetProject, loadProject, bumpRegistryVersion,
 } from '../../store/editorSlice';
 
 const initialState = reducer(undefined, { type: '@@INIT' });
@@ -411,5 +411,49 @@ describe('setSafeAreaMargins', () => {
     const s = reducer(state(), setSafeAreaMargins({ top: 99 }));
     expect(s.safeAreaMargins.top).toBe(99);
     expect(s.safeAreaMargins.right).toBe(32); // unchanged
+  });
+});
+
+// ─── bumpRegistryVersion ──────────────────────────────────────────────────────
+
+describe('bumpRegistryVersion', () => {
+  it('increments registryVersion by 1 each call', () => {
+    let s = state();
+    expect(s.registryVersion).toBe(0);
+    s = reducer(s, bumpRegistryVersion());
+    expect(s.registryVersion).toBe(1);
+    s = reducer(s, bumpRegistryVersion());
+    expect(s.registryVersion).toBe(2);
+  });
+
+  it('registryVersion is not included in undo/redo snapshots', () => {
+    let s = reducer(state(), bumpRegistryVersion());
+    expect(s.registryVersion).toBe(1);
+    // add element to create a history entry, then undo
+    s = reducer(s, addElement({ type: 'text', x: 0, y: 0, width: 100 }));
+    s = reducer(s, undoHistory());
+    // undo restores elements but must not reset registryVersion
+    expect(s.registryVersion).toBe(1);
+  });
+
+  it('resetProject resets registryVersion to 0', () => {
+    let s = reducer(state(), bumpRegistryVersion());
+    s = reducer(s, resetProject());
+    expect(s.registryVersion).toBe(0);
+  });
+});
+
+// ─── loadProject — single layout ─────────────────────────────────────────────
+
+describe('loadProject — single layout', () => {
+  it('restores deviceFramesLayout: single when explicitly saved', () => {
+    const s = reducer(state(), loadProject({ canvasSize: { width: 780, height: 130 }, elements: [], deviceFramesLayout: 'single' }));
+    expect(s.deviceFramesLayout).toBe('single');
+  });
+
+  it('falls back to tall heuristic for old 780×130 projects without saved layout', () => {
+    // width 780 ≤ 1200 → heuristic gives 'tall', not 'single'
+    const s = reducer(state(), loadProject({ canvasSize: { width: 780, height: 130 }, elements: [] }));
+    expect(s.deviceFramesLayout).toBe('tall');
   });
 });
