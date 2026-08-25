@@ -26,7 +26,7 @@ export default function AddPanel() {
       x: 40, y: 40,
       width: Math.min(400, canvasSize.width - 80),
       fontSize: 36,
-      fontFamily: 'Rozetkaweb Regular',
+      fontFamily: 'Rozetka306pro Regular',
       fontStyle: 'normal',
       textDecoration: '',
       align: 'left',
