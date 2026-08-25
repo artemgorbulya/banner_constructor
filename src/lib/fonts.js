@@ -1,9 +1,9 @@
 export const LOCAL_FONTS = [
-  'Rozetkaweb Regular',
-  'Rozetkaweb Bold',
-  'Rozetkaweb Medium',
-  'Rozetkaweb Light',
-  'Rozetkaweb Black',
+  'Rozetka306pro Regular',
+  'Rozetka306pro Bold',
+  'Rozetka306pro Medium',
+  'Rozetka306pro Light',
+  'Rozetka306pro Black',
 ];
 
 const loadedFonts = new Set(['sans-serif', 'serif', 'monospace']);

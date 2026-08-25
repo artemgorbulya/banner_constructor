@@ -1,9 +1,9 @@
-@font-face { font-family: 'Rozetkaweb Regular'; src: url('/fonts/RozetkawebRegular.ttf') format('truetype'); }
-@font-face { font-family: 'Rozetkaweb Bold'; src: url('/fonts/RozetkawebBold.ttf') format('truetype'); }
-@font-face { font-family: 'Rozetkaweb Light'; src: url('/fonts/RozetkawebLight.ttf') format('truetype'); }
-@font-face { font-family: 'Rozetkaweb Medium'; src: url('/fonts/RozetkawebMedium.ttf') format('truetype'); }
-@font-face { font-family: 'Rozetkaweb Black'; src: url('/fonts/RozetkawebBlack.ttf') format('truetype'); }
-@font-face { font-family: 'Rozetkaweb Thin Compressed'; src: url('/fonts/RozetkawebThinCompressed.ttf') format('truetype'); }
+@font-face { font-family: 'Rozetka306pro Regular'; src: url('/fonts/Rozetka306pro-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Rozetka306pro Bold'; src: url('/fonts/Rozetka306pro-Bold.ttf') format('truetype'); }
+@font-face { font-family: 'Rozetka306pro Light'; src: url('/fonts/Rozetka306pro-Light.ttf') format('truetype'); }
+@font-face { font-family: 'Rozetka306pro Medium'; src: url('/fonts/Rozetka306pro-Medium.ttf') format('truetype'); }
+@font-face { font-family: 'Rozetka306pro Black'; src: url('/fonts/Rozetka306pro-Black.ttf') format('truetype'); }
+@font-face { font-family: 'Rozetka306pro Thin Compressed'; src: url('/fonts/Rozetka306pro-ThinCompressed.ttf') format('truetype'); }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
