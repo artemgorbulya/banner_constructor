@@ -12,22 +12,6 @@
 
 export const LIBRARY = [
   {
-    id: 'banners',
-    label: 'Фони',
-    items: [
-      { name: 'Банер 1', src: '/library/banner/baner1.png' },
-      { name: 'Банер 2', src: '/library/banner/baner2.png' },
-      { name: 'Банер 3', src: '/library/banner/baner3.png' },
-      { name: 'Банер 4', src: '/library/banner/baner4.png' },
-      { name: 'Банер 5', src: '/library/banner/baner5.png' },
-      { name: 'Банер 6', src: '/library/banner/baner6.png' },
-      { name: 'Банер 7', src: '/library/banner/baner7.png' },
-      { name: 'Банер 8', src: '/library/banner/baner8.png' },
-      { name: 'Банер 9', src: '/library/banner/baner9.png' },
-      { name: 'Банер 10', src: '/library/banner/baner10.png' },
-    ],
-  },
-  {
     id: 'bubbles',
     label: 'Бульбашки',
     items: [
