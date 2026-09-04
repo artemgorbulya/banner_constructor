@@ -104,6 +104,18 @@ describe('addElement', () => {
     expect(s.elements[0].opacity).toBe(0.5);
   });
 
+  it('adds a colorBlock element with expected default fields applied by addElement', () => {
+    const s = reducer(state(), addElement({
+      type: 'colorBlock', x: 10, y: 10, width: 50, height: 50, fill: '#ffffff', name: 'Кольоровий блок',
+    }));
+    const el = s.elements[0];
+    expect(el.type).toBe('colorBlock');
+    expect(el.visible).toBe(true);
+    expect(el.rotation).toBe(0);
+    expect(el.opacity).toBe(1);
+    expect(el.fill).toBe('#ffffff');
+  });
+
   it('records history entry', () => {
     const s = reducer(state(), addElement({ type: 'text', x: 0, y: 0, width: 100 }));
     expect(s.history.past).toHaveLength(1);
@@ -205,6 +217,26 @@ describe('setCanvasSizeAndScale', () => {
     let s = state();
     s = reducer(s, addElement({ type: 'text', x: 100, y: 100, width: 200 }));
     expect(() => reducer(s, setCanvasSizeAndScale({ width: 440, height: 204 }))).not.toThrow();
+  });
+
+  it('handles colorBlock element (scales like image, has height) without throwing', () => {
+    let s = state();
+    s = reducer(s, addElement({ type: 'colorBlock', x: 440, y: 204, width: 100, height: 100, fill: '#ffffff' }));
+    s = reducer(s, setCanvasSizeAndScale({ width: 1760, height: 816 }));
+    const el = s.elements[0];
+    expect(el.x).toBe(880); // 440 * 2
+    expect(el.y).toBe(408); // 204 * 2
+    expect(el.width).toBe(100); // unchanged
+    expect(el.height).toBe(100); // unchanged
+  });
+
+  it('clamps colorBlock position to canvas bounds using its height', () => {
+    let s = state();
+    s = reducer(s, addElement({ type: 'colorBlock', x: 0, y: 350, width: 100, height: 100, fill: '#ffffff' }));
+    s = reducer(s, setCanvasSizeAndScale({ width: 440, height: 204 }));
+    const el = s.elements[0];
+    expect(el.y).toBeGreaterThanOrEqual(0);
+    expect(el.y).toBeLessThanOrEqual(204 - 100); // clamped to (height - elH)
   });
 
   it('clamps element position to canvas bounds', () => {

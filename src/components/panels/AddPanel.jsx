@@ -5,7 +5,7 @@ import { resolveImage } from '../../lib/imageRegistry';
 import ImageModal from '../modals/ImageModal';
 import AiGenerateModal from '../modals/AiGenerateModal';
 import { ChromePicker } from 'react-color';
-import { Type, Image, Wallpaper, Sparkles } from 'lucide-react';
+import { Type, Image, Wallpaper, Sparkles, Square } from 'lucide-react';
 
 export default function AddPanel() {
   const dispatch = useDispatch();
@@ -41,6 +41,19 @@ export default function AddPanel() {
     }));
   }
 
+  function addColorBlock() {
+    const size = Math.round(canvasSize.height * 0.5);
+    dispatch(addElement({
+      type: 'colorBlock',
+      fill: '#ffffff',
+      x: Math.round((canvasSize.width - size) / 2),
+      y: Math.round((canvasSize.height - size) / 2),
+      width: size,
+      height: size,
+      name: 'Кольоровий блок',
+    }));
+  }
+
   return (
     <aside className="side-panel">
       <div className="panel-section">
@@ -52,6 +65,10 @@ export default function AddPanel() {
         <button className="add-btn" onClick={() => setShowImageModal(true)}>
           <span className="add-btn-icon"><Image size={18} /></span>
           Зображення / Логотип
+        </button>
+        <button className="add-btn" onClick={addColorBlock}>
+          <span className="add-btn-icon"><Square size={18} /></span>
+          Кольоровий елемент
         </button>
       </div>
 
