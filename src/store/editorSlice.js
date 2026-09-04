@@ -90,7 +90,7 @@ export const editorSlice = createSlice({
       // Scale only positions, keep dimensions unchanged, clamp to canvas bounds
       state.elements = state.elements.map(el => {
         const elW = el.width ?? 0;
-        const elH = el.type === 'image' ? (el.height ?? elW) : 0;
+        const elH = (el.type === 'image' || el.type === 'colorBlock') ? (el.height ?? elW) : 0;
         const newX = Math.round(el.x * sx);
         const newY = Math.round(el.y * sy);
         return {

@@ -12,6 +12,7 @@ import BannerCanvas from './components/Canvas/BannerCanvas';
 import LayersPanel from './components/panels/LayersPanel';
 import AddPanel from './components/panels/AddPanel';
 import TextControls from './components/panels/TextControls';
+import ColorBlockControls from './components/panels/ColorBlockControls';
 import ElementSizeControls from './components/panels/ElementSizeControls';
 
 function EditorInner() {
@@ -72,6 +73,7 @@ function EditorInner() {
           <div ref={textControlsRef}>
             <TextControls />
           </div>
+          <ColorBlockControls />
         </div>
       </div>
     </div>
