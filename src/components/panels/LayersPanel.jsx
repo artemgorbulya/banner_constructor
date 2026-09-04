@@ -58,9 +58,11 @@ export default function LayersPanel() {
           >
             {el.type === 'image' && el.src
               ? <img className="layer-thumb" src={resolveImage(el.src)} alt="" draggable={false} />
-              : <span className="layer-icon"><Type size={14} /></span>
+              : el.type === 'colorBlock'
+                ? <span className="layer-swatch" style={{ background: el.fill }} />
+                : <span className="layer-icon"><Type size={14} /></span>
             }
-            <span className="layer-name">{el.name || (el.type === 'text' ? 'Текст' : 'Зображення')}</span>
+            <span className="layer-name">{el.name || (el.type === 'text' ? 'Текст' : el.type === 'colorBlock' ? 'Кольоровий блок' : 'Зображення')}</span>
             <div className="layer-actions">
               <button
                 className="btn btn-icon-sm"

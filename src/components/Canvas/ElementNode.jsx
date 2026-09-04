@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { Image as KonvaImage, Text as KonvaText } from 'react-konva';
+import { Image as KonvaImage, Text as KonvaText, Rect as KonvaRect } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateElement, updateElementWithHistory, setSelectedId, selectRegistryVersion } from '../../store/editorSlice';
 import { resolveImage } from '../../lib/imageRegistry';
@@ -129,6 +129,51 @@ function TextNode({ el, onSelect }) {
   );
 }
 
+function ColorBlockNode({ el, onSelect }) {
+  const dispatch = useDispatch();
+  const snap = useSnapGrid();
+
+  return (
+    <KonvaRect
+      id={el.id}
+      x={el.x}
+      y={el.y}
+      width={el.width}
+      height={el.height}
+      fill={el.fill}
+      rotation={el.rotation}
+      opacity={el.opacity}
+      visible={el.visible}
+      draggable
+      onMouseDown={onSelect}
+      onTap={onSelect}
+      onDragMove={e => {
+        const snapped = snap({ x: e.target.x(), y: e.target.y() });
+        e.target.x(snapped.x);
+        e.target.y(snapped.y);
+        dispatch(updateElement({ id: el.id, x: snapped.x, y: snapped.y }));
+      }}
+      onDragEnd={e => {
+        const snapped = snap({ x: e.target.x(), y: e.target.y() });
+        dispatch(updateElementWithHistory({ id: el.id, x: snapped.x, y: snapped.y }));
+      }}
+      onTransformEnd={e => {
+        const node = e.target;
+        dispatch(updateElementWithHistory({
+          id: el.id,
+          x: node.x(),
+          y: node.y(),
+          width: Math.max(10, node.width() * node.scaleX()),
+          height: Math.max(10, node.height() * node.scaleY()),
+          rotation: node.rotation(),
+        }));
+        node.scaleX(1);
+        node.scaleY(1);
+      }}
+    />
+  );
+}
+
 export default function ElementNode({ el }) {
   const dispatch = useDispatch();
 
@@ -139,5 +184,6 @@ export default function ElementNode({ el }) {
 
   if (el.type === 'image') return <ImageNode el={el} onSelect={handleSelect} />;
   if (el.type === 'text') return <TextNode el={el} onSelect={handleSelect} />;
+  if (el.type === 'colorBlock') return <ColorBlockNode el={el} onSelect={handleSelect} />;
   return null;
 }

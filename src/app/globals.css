@@ -103,6 +103,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); }
 .layer-selected { background: rgba(124, 110, 245, .25) !important; }
 .layer-icon { width: 18px; text-align: center; font-size: 12px; flex-shrink: 0; }
 .layer-thumb { width: 28px; height: 28px; object-fit: cover; border-radius: 3px; flex-shrink: 0; background: var(--surface2); }
+.layer-swatch { width: 28px; height: 28px; border-radius: 3px; flex-shrink: 0; border: 1px solid var(--border); }
 .layer-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 .layer-actions { display: flex; gap: 2px; opacity: 0; transition: opacity .12s; }
 .layer-item:hover .layer-actions { opacity: 1; }

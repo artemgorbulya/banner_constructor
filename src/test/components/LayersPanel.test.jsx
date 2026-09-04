@@ -100,6 +100,37 @@ describe('LayersPanel — text elements', () => {
   });
 });
 
+// ─── Color block elements ───────────────────────────────────────────────────
+
+describe('LayersPanel — colorBlock elements', () => {
+  it('shows layer-swatch span (not thumbnail or text icon) for colorBlock element', () => {
+    const store = makeStore();
+    store.dispatch(addElement({ type: 'colorBlock', x: 0, y: 0, width: 100, height: 100, fill: '#ff0000' }));
+    renderPanel(store);
+    const layerItems = document.querySelectorAll('.layer-item');
+    expect(layerItems).toHaveLength(1);
+    const swatch = layerItems[0].querySelector('.layer-swatch');
+    expect(swatch).toBeTruthy();
+    expect(swatch.style.background).toBe('rgb(255, 0, 0)');
+    expect(layerItems[0].querySelector('img.layer-thumb')).toBeNull();
+    expect(layerItems[0].querySelector('.layer-icon')).toBeNull();
+  });
+
+  it('shows element name for colorBlock element', () => {
+    const store = makeStore();
+    store.dispatch(addElement({ type: 'colorBlock', x: 0, y: 0, width: 100, height: 100, fill: '#ffffff', name: 'custom-block' }));
+    renderPanel(store);
+    expect(screen.getByText('custom-block')).toBeInTheDocument();
+  });
+
+  it('falls back to "Кольоровий блок" when colorBlock has no name', () => {
+    const store = makeStore();
+    store.dispatch(addElement({ type: 'colorBlock', x: 0, y: 0, width: 100, height: 100, fill: '#ffffff' }));
+    renderPanel(store);
+    expect(screen.getByText('Кольоровий блок')).toBeInTheDocument();
+  });
+});
+
 // ─── Background image ─────────────────────────────────────────────────────────
 
 describe('LayersPanel — background image', () => {
