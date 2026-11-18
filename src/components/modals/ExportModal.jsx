@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { exportBanner } from '../../lib/export';
+import { generateThumbnail } from '../../lib/projects';
+import { buildExportEvent, trackExport } from '../../lib/stats';
+import { selectCanvasSize, selectElements } from '../../store/editorSlice';
 import { X, AlertTriangle, Save } from 'lucide-react';
 
 const SIZE_LIMIT_KB = 150;
@@ -18,6 +22,8 @@ function calcSizeKB(stageRef, format, quality) {
 }
 
 export default function ExportModal({ stageRef, onClose, onSaveAsProject }) {
+  const canvasSize = useSelector(selectCanvasSize);
+  const elements = useSelector(selectElements);
   const [format, setFormat] = useState('png');
   const [quality, setQuality] = useState(0.9);
   const [fileSize, setFileSize] = useState(null);
@@ -34,6 +40,17 @@ export default function ExportModal({ stageRef, onClose, onSaveAsProject }) {
 
   function handleExport() {
     exportBanner(stageRef, format, quality);
+    // Usage statistics — background, never blocks or breaks the download
+    try {
+      trackExport(buildExportEvent({
+        canvasSize,
+        elements: elements.filter(el => el.visible !== false),
+        format,
+        thumbnail: generateThumbnail(stageRef),
+      }));
+    } catch {
+      // ignore
+    }
     onClose();
   }
 

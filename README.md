@@ -14,6 +14,7 @@ A browser-based banner editor built with Next.js and Konva. Create, edit, and ex
 - **Aspect ratio lock** — global toggle that constrains all resize handles
 - **Undo / Redo** — full history stack (Ctrl+Z / Ctrl+Shift+Z)
 - **Export** — PNG (lossless) or JPG with adjustable quality; file size preview before download
+- **Usage statistics** — every export is logged to Vercel Blob; `/stats` shows totals, sizes, formats, the last 14 days and recent banners with previews
 - **Auto-save** — project state persists in `localStorage` across sessions
 
 ## Tech Stack
@@ -42,6 +43,14 @@ npm run lint       # ESLint
 
 Node 18+ required. No environment variables needed for the base editor.
 
+## Usage Statistics
+
+Each banner download is recorded (size/preset, format, element counts, texts, small preview) and shown at **`/stats`**.
+
+Setup (once): Vercel → project → **Storage → Create → Blob** (choose *Private*) → connect it to the project. Vercel adds `BLOB_READ_WRITE_TOKEN` automatically. For local testing run `vercel env pull .env.local`. Without the token, exports work as usual and `/stats` shows a setup hint.
+
+> `/stats` has no password — anyone with the link can see it. Banner texts are included.
+
 ## Keyboard Shortcuts
 
 | Key | Action |
@@ -58,7 +67,10 @@ src/
 │   ├── layout.jsx          # HTML shell + metadata
 │   ├── page.jsx            # Entry: renders ClientPage
 │   ├── ClientPage.jsx      # 'use client' boundary, dynamic import of App
-│   └── api/proxy-image/    # image proxy for loading by URL
+│   ├── stats/page.jsx      # /stats — usage statistics page
+│   └── api/
+│       ├── proxy-image/    # image proxy for loading by URL
+│       └── stats/          # POST: store one export event in Vercel Blob
 ├── App.jsx                 # Redux Provider + editor layout
 ├── components/
 │   ├── Canvas/
@@ -76,6 +88,7 @@ src/
 │   └── editorSlice.js      # All state: canvas, elements, history
 ├── lib/
 │   ├── export.js           # toDataURL → file download
+│   ├── stats.js            # usage statistics: event building, validation, summaries
 │   ├── fonts.js            # Google Fonts loader (awaits document.fonts.load)
 │   └── library.js          # Built-in image library definitions
 └── hooks/
