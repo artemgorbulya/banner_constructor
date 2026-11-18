@@ -46,3 +46,13 @@ describe('AddPanel — Кольоровий елемент button', () => {
     expect(state.selectedId).toBe(state.elements[0].id);
   });
 });
+
+describe('AddPanel — Фон section', () => {
+  it('shows only Колір and Зображення background buttons (no AI background)', () => {
+    renderPanel(makeStore());
+    expect(screen.getByTitle('Колір фону')).toBeInTheDocument();
+    expect(screen.getByTitle('Фон зображенням')).toBeInTheDocument();
+    expect(screen.queryByText('AI Фон')).toBeNull();
+    expect(screen.queryByTitle('Згенерувати фон через AI')).toBeNull();
+  });
+});
