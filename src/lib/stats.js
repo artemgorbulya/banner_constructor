@@ -103,6 +103,14 @@ export function summarize(entries, { now = Date.now(), days = 14 } = {}) {
 const MAX_DIMENSION = 10000;
 const THUMB_PREFIX = 'data:image/jpeg;base64,';
 
+// Vercel Blob credentials: either a read-write token (classic stores) or a store id
+// used with the runtime OIDC token (newer stores connected via Storage → Blob).
+export const BLOB_ENV_VARS = ['BLOB_READ_WRITE_TOKEN', 'BLOB_STORE_ID'];
+
+export function isStatsConfigured() {
+  return BLOB_ENV_VARS.some(k => !!process.env[k]);
+}
+
 export function blobAccess() {
   return process.env.STATS_BLOB_ACCESS === 'public' ? 'public' : 'private';
 }

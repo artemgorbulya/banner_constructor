@@ -30,9 +30,19 @@ describe('/stats page', () => {
 
   it('explains how to set up when Blob is not configured', async () => {
     vi.stubEnv('BLOB_READ_WRITE_TOKEN', '');
+    vi.stubEnv('BLOB_STORE_ID', '');
     await renderPage();
     expect(screen.getByText(/Статистика не налаштована/)).toBeInTheDocument();
     expect(list).not.toHaveBeenCalled();
+  });
+
+  it('works with BLOB_STORE_ID only (OIDC auth on Vercel)', async () => {
+    vi.stubEnv('BLOB_READ_WRITE_TOKEN', '');
+    vi.stubEnv('BLOB_STORE_ID', 'store_abc');
+    list.mockResolvedValue({ blobs: [], hasMore: false });
+    await renderPage();
+    expect(screen.queryByText(/Статистика не налаштована/)).toBeNull();
+    expect(list).toHaveBeenCalled();
   });
 
   it('shows an empty state when there are no exports', async () => {

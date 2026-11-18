@@ -1,5 +1,5 @@
 import { list, get } from '@vercel/blob';
-import { STATS_PREFIX, parseStatsPath, summarize, blobAccess } from '../../lib/stats';
+import { STATS_PREFIX, parseStatsPath, summarize, blobAccess, isStatsConfigured } from '../../lib/stats';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Статистика — Banner Constructor' };
@@ -68,12 +68,13 @@ function Breakdown({ title, data }) {
 }
 
 export default async function StatsPage() {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!isStatsConfigured()) {
     return (
       <Shell>
         <p className="stats-muted">
-          Статистика не налаштована: немає змінної <code>BLOB_READ_WRITE_TOKEN</code>.
-          Підключіть Vercel Blob до проєкту (Storage → Blob).
+          Статистика не налаштована: немає змінної <code>BLOB_READ_WRITE_TOKEN</code> або{' '}
+          <code>BLOB_STORE_ID</code>. Підключіть Vercel Blob до проєкту (Storage → Blob) і зробіть Redeploy —
+          змінні середовища застосовуються лише до нових деплоїв.
         </p>
       </Shell>
     );

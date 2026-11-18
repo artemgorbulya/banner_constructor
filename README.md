@@ -47,7 +47,7 @@ Node 18+ required. No environment variables needed for the base editor.
 
 Each banner download is recorded (size/preset, format, element counts, texts, small preview) and shown at **`/stats`**.
 
-Setup (once): Vercel → project → **Storage → Create → Blob** (choose *Private*) → connect it to the project. Vercel adds `BLOB_READ_WRITE_TOKEN` automatically. For local testing run `vercel env pull .env.local`. Without the token, exports work as usual and `/stats` shows a setup hint.
+Setup (once): Vercel → project → **Storage → Create → Blob** (choose *Private*) → connect it to the project. Vercel adds `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` automatically — then **Redeploy**, because env vars only apply to new deployments. For local testing run `vercel env pull .env.local`. Without these vars, exports work as usual and `/stats` shows a setup hint.
 
 > `/stats` has no password — anyone with the link can see it. Banner texts are included.
 
