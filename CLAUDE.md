@@ -99,6 +99,14 @@ Projects are stored in **IndexedDB** (`banner_projects` database, `projects` sto
 
 `src/lib/export.js` calls `stageRef.current.toDataURL()` on the **hidden export stage** (exact pixel dimensions, no scale). PNG is always lossless; JPG accepts a 0–1 quality param.
 
+### Usage statistics (`/stats`)
+
+Every banner download in `ExportModal` fires `trackExport(buildExportEvent(...))` (`src/lib/stats.js`) — a fire-and-forget `POST /api/stats` that must never block or break the export. The event holds preset/size, format, element counts, first texts and a small JPEG thumbnail (`generateThumbnail`).
+
+`src/app/api/stats/route.js` validates via `sanitizeEvent` (server timestamp, JPEG-only thumbnail, clamped texts/counts, 100 KB cap) and stores **one Vercel Blob per export** (no shared file → no write races). Key fields are encoded in the pathname (`stats/<ts>__<preset-slug>__<W>x<H>__<format>.json`, parsed by `parseStatsPath`) so `src/app/stats/page.jsx` builds summaries from `list()` alone and reads only the latest 50 JSONs via `get()`.
+
+Requires `BLOB_READ_WRITE_TOKEN` (set automatically when a Blob store is connected in Vercel). Without it the route returns 204 and the page shows a setup hint. Blob access is `private` by default; set `STATS_BLOB_ACCESS=public` only if the store was created as public. `/stats` is not linked from the UI and has no auth.
+
 ## Testing
 
 **Stack**: Vitest + React Testing Library + jsdom. Config: `vitest.config.mjs` (`.mjs` forces ESM; takes precedence over `vitest.config.js`). Setup: `src/test/setup.js`.
@@ -115,6 +123,9 @@ src/test/
   lib/fonts.test.js
   lib/export.test.js
   lib/snapGrid.test.js
+  lib/stats.test.js           ← event building, pathname encoding, summaries, sanitizeEvent
+  api/stats.route.test.js     ← POST /api/stats with mocked @vercel/blob
+  app/statsPage.test.jsx      ← async Server Component rendered via `render(await StatsPage())`
   hooks/                      ← useKeyboard, useLocalStorage (fake timers for debounce)
   components/Toolbar.test.jsx
   components/AddPanel.test.jsx
