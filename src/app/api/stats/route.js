@@ -1,12 +1,12 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
-import { statsPath, sanitizeEvent, blobAccess } from '../../../lib/stats';
+import { statsPath, sanitizeEvent, blobAccess, isStatsConfigured } from '../../../lib/stats';
 
 const MAX_BODY_BYTES = 100 * 1024;
 
 export async function POST(request) {
   // Not configured (local dev, tests, preview without Blob) — silently skip.
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!isStatsConfigured()) {
     return new Response(null, { status: 204 });
   }
 

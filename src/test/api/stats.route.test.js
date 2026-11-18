@@ -23,6 +23,7 @@ describe('POST /api/stats', () => {
 
   it('returns 204 and stores nothing when Blob is not configured', async () => {
     vi.stubEnv('BLOB_READ_WRITE_TOKEN', '');
+    vi.stubEnv('BLOB_STORE_ID', '');
     const res = await POST(req(valid));
     expect(res.status).toBe(204);
     expect(put).not.toHaveBeenCalled();
@@ -38,6 +39,14 @@ describe('POST /api/stats', () => {
     expect(JSON.parse(body)).toMatchObject({ ...valid, preset: 'Web Banner', ts: 1763546400000 });
     expect(opts).toEqual({ access: 'private', contentType: 'application/json', addRandomSuffix: true });
     vi.restoreAllMocks();
+  });
+
+  it('stores events when only BLOB_STORE_ID is set (OIDC auth on Vercel)', async () => {
+    vi.stubEnv('BLOB_READ_WRITE_TOKEN', '');
+    vi.stubEnv('BLOB_STORE_ID', 'store_abc');
+    const res = await POST(req(valid));
+    expect(res.status).toBe(204);
+    expect(put).toHaveBeenCalledTimes(1);
   });
 
   it('uses public access when STATS_BLOB_ACCESS=public', async () => {

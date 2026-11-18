@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   presetLabel, buildExportEvent, trackExport, statsPath, parseStatsPath,
-  summarize, kyivDay, sanitizeEvent, blobAccess, MAX_TEXTS, MAX_TEXT_LEN,
+  summarize, kyivDay, sanitizeEvent, blobAccess, isStatsConfigured, MAX_TEXTS, MAX_TEXT_LEN,
 } from '../../lib/stats';
 
 const T = (text, extra = {}) => ({ type: 'text', text, ...extra });
@@ -193,5 +193,20 @@ describe('blobAccess', () => {
     expect(blobAccess()).toBe('public');
     vi.stubEnv('STATS_BLOB_ACCESS', 'whatever');
     expect(blobAccess()).toBe('private');
+  });
+});
+
+describe('isStatsConfigured', () => {
+  afterEach(() => { vi.unstubAllEnvs(); });
+  it.each([
+    ['no credentials', {}, false],
+    ['read-write token', { BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_x' }, true],
+    ['store id (OIDC, newer stores)', { BLOB_STORE_ID: 'store_abc' }, true],
+    ['empty values', { BLOB_READ_WRITE_TOKEN: '', BLOB_STORE_ID: '' }, false],
+  ])('%s → %s', (_, env, expected) => {
+    vi.stubEnv('BLOB_READ_WRITE_TOKEN', '');
+    vi.stubEnv('BLOB_STORE_ID', '');
+    for (const [k, v] of Object.entries(env)) vi.stubEnv(k, v);
+    expect(isStatsConfigured()).toBe(expected);
   });
 });
