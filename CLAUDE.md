@@ -91,10 +91,6 @@ Projects are stored in **IndexedDB** (`banner_projects` database, `projects` sto
 
 `loadFont(family)` returns a Promise that resolves only after both the Google Fonts CSS is parsed AND `document.fonts.load()` confirms the face is available. Font changes in `TextControls` `await loadFont()` before dispatching to Redux — otherwise Konva draws with the fallback font.
 
-### AI generation (`src/lib/aiGenerate.js`)
-
-Uses `GoogleGenAI` SDK (`@google/genai`) with `ai.interactions.create()` and model `models/gemini-2.5-flash-image`. The API key is entered by the user and stored in `localStorage` under `gemini_api_key`.
-
 ### Image library (`src/lib/library.js`)
 
 `LIBRARY` array of categories. To add images: copy file to `public/library/`, add `{ name, src: '/library/filename' }` to the target category. Empty categories are hidden in the UI.
@@ -112,13 +108,20 @@ Uses `GoogleGenAI` SDK (`@google/genai`) with `ai.interactions.create()` and mod
 src/test/
   setup.js                    ← global mocks: react-konva, file-saver, crypto.randomUUID
   store/editorSlice.test.js   ← pure reducer tests (no React)
+  store/index.test.js         ← preloadedState from localStorage (re-imports module per test)
   lib/presets.test.js         ← PRESETS structure + computeDeviceFrames all layouts
   lib/projects.test.js        ← IndexedDB via fake-indexeddb
+  lib/imageRegistry.test.js   ← IDB-backed image registry (fake-indexeddb + vi.resetModules)
   lib/fonts.test.js
   lib/export.test.js
   lib/snapGrid.test.js
+  hooks/                      ← useKeyboard, useLocalStorage (fake timers for debounce)
   components/Toolbar.test.jsx
-  components/modals/          ← ExportModal, ProjectsModal, SizeModal
+  components/AddPanel.test.jsx
+  components/LayersPanel.test.jsx
+  components/canvas/          ← ElementNode (local react-konva mock captures props; handlers called with fake nodes)
+  components/panels/          ← TextControls, ColorBlockControls, ElementSizeControls; colorPickerMock.jsx stubs react-color
+  components/modals/          ← ExportModal, ImageModal, InfoModal, ProjectsModal, ResizeConfirmModal, SizeModal
 ```
 
 **Key testing patterns**:
