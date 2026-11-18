@@ -1,13 +1,12 @@
 # Banner Constructor
 
-A browser-based banner editor built with Next.js and Konva. Create, edit, and export banners with images, text, and AI-generated backgrounds — no backend required.
+A browser-based banner editor built with Next.js and Konva. Create, edit, and export banners with images and text.
 
 ![Banner Constructor](public/favicon.svg)
 
 ## Features
 
 - **Canvas editor** — drag, resize, rotate, and layer images and text on a Konva canvas
-- **AI background generation** — describe a background in text, generate it via Google Gemini, apply with one click
 - **Image library** — built-in clipart organized by category (banners, bubbles, devices)
 - **Text controls** — font family (Google Fonts), size, color, bold, italic, align, line height
 - **Size presets** — Billboard (1536×256), Web Banner (880×408), or custom dimensions
@@ -25,7 +24,6 @@ A browser-based banner editor built with Next.js and Konva. Create, edit, and ex
 | UI | React 19 |
 | Canvas | Konva 10 + react-konva |
 | State | Redux Toolkit |
-| AI | Google Gemini 2.5 Flash (`@google/genai`) |
 | Icons | lucide-react |
 | Color picker | react-color |
 
@@ -44,17 +42,6 @@ npm run lint       # ESLint
 
 Node 18+ required. No environment variables needed for the base editor.
 
-## AI Background Generation
-
-The AI feature uses Google Gemini and requires a free API key from [Google AI Studio](https://aistudio.google.com/apikey).
-
-1. Click **AI Фон** in the toolbar
-2. Paste your API key (stored only in your browser's `localStorage`)
-3. Describe the background (e.g. "abstract blue gradient with waves, minimalist")
-4. Generate → preview → apply
-
-> The free tier may hit quota limits. Enable billing at [ai.google.dev](https://ai.google.dev) if you hit the limit.
-
 ## Keyboard Shortcuts
 
 | Key | Action |
@@ -71,7 +58,7 @@ src/
 │   ├── layout.jsx          # HTML shell + metadata
 │   ├── page.jsx            # Entry: renders ClientPage
 │   ├── ClientPage.jsx      # 'use client' boundary, dynamic import of App
-│   └── api/generate/       # API route for AI generation
+│   └── api/proxy-image/    # image proxy for loading by URL
 ├── App.jsx                 # Redux Provider + editor layout
 ├── components/
 │   ├── Canvas/
@@ -83,12 +70,11 @@ src/
 │   │   ├── LayersPanel.jsx     # Layer list with visibility / order controls
 │   │   ├── AddPanel.jsx        # Image upload + library browser
 │   │   └── TextControls.jsx    # Font, size, style controls
-│   └── modals/                 # SizeModal, ExportModal, AiGenerateModal, InfoModal
+│   └── modals/                 # SizeModal, ExportModal, ImageModal, InfoModal
 ├── store/
 │   ├── index.js            # configureStore with localStorage preload
 │   └── editorSlice.js      # All state: canvas, elements, history
 ├── lib/
-│   ├── aiGenerate.js       # Gemini API call
 │   ├── export.js           # toDataURL → file download
 │   ├── fonts.js            # Google Fonts loader (awaits document.fonts.load)
 │   └── library.js          # Built-in image library definitions

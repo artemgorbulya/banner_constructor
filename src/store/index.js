@@ -1,10 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import editorReducer from './editorSlice';
+import editorReducer, { loadProject } from './editorSlice';
 
-// Read saved project synchronously BEFORE first render.
-// This avoids the race condition where useLocalStorageSave fires on mount
-// with the default empty state and overwrites the previously saved project
-// before useLocalStorageRestore gets a chance to read it.
+// Read the autosaved project synchronously BEFORE first render, so the first
+// useLocalStorageSave run persists the restored project instead of overwriting
+// it with the empty default state.
 function loadSavedState() {
   try {
     const raw =
@@ -13,26 +12,31 @@ function loadSavedState() {
     if (!raw) return undefined;
     const data = JSON.parse(raw);
     if (!data?.canvasSize || !Array.isArray(data?.elements)) return undefined;
-    return {
-      canvasSize: data.canvasSize,
-      background: data.background ?? { color: '#ffffff' },
-      backgroundImage: data.backgroundImage ?? { src: null, x: 0, y: 0, width: 0, height: 0, rotation: 0 },
-      elements: data.elements,
-      selectedId: null,
-      snapEnabled: true,
-      keepRatio: true,
-      safeAreaEnabled: true,
-      safeAreaMargins: data.safeAreaMargins ?? { top: 24, right: 32, bottom: 48, left: 32 },
-      logoFrameEnabled: data.logoFrameEnabled ?? true,
-      deviceFramesEnabled: data.deviceFramesEnabled ?? true,
-      history: { past: [], future: [] },
-    };
+    // Same normalisation as opening a project from the Projects modal / file import:
+    // defaults for missing fields, deviceFramesLayout fallback, cleared selection & history.
+    return editorReducer(undefined, loadProject(data));
   } catch {
     return undefined;
   }
 }
 
-const savedEditorState = typeof window !== 'undefined' ? loadSavedState() : undefined;
+// API keys of removed features (AI background via Gemini, remove.bg cut-out).
+// Delete them so the secrets don't linger in the browser.
+const REMOVED_FEATURE_KEYS = ['gemini_api_key', 'removebg_api_key'];
+
+function clearRemovedFeatureKeys() {
+  try {
+    REMOVED_FEATURE_KEYS.forEach(k => localStorage.removeItem(k));
+  } catch {
+    // storage unavailable — nothing to clean
+  }
+}
+
+let savedEditorState;
+if (typeof window !== 'undefined') {
+  clearRemovedFeatureKeys();
+  savedEditorState = loadSavedState();
+}
 
 export const store = configureStore({
   reducer: {
