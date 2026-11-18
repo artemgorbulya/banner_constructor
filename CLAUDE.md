@@ -105,7 +105,7 @@ Every banner download in `ExportModal` fires `trackExport(buildExportEvent(...))
 
 `src/app/api/stats/route.js` validates via `sanitizeEvent` (server timestamp, JPEG-only thumbnail, clamped texts/counts, 100 KB cap) and stores **one Vercel Blob per export** (no shared file → no write races). Key fields are encoded in the pathname (`stats/<ts>__<preset-slug>__<W>x<H>__<format>.json`, parsed by `parseStatsPath`) so `src/app/stats/page.jsx` builds summaries from `list()` alone and reads only the latest 50 JSONs via `get()`.
 
-Requires `BLOB_READ_WRITE_TOKEN` (set automatically when a Blob store is connected in Vercel). Without it the route returns 204 and the page shows a setup hint. Blob access is `private` by default; set `STATS_BLOB_ACCESS=public` only if the store was created as public. `/stats` is not linked from the UI and has no auth.
+Configured when `BLOB_READ_WRITE_TOKEN` (classic stores) or `BLOB_STORE_ID` (newer stores, OIDC auth via the runtime `VERCEL_OIDC_TOKEN`) is set — see `isStatsConfigured()`. Vercel adds one when a Blob store is connected; a redeploy is needed. Without either, the route returns 204 and the page shows a setup hint. Blob access is `private` by default; set `STATS_BLOB_ACCESS=public` only if the store was created as public. `/stats` is not linked from the UI and has no auth.
 
 ## Testing
 
