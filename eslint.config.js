@@ -35,4 +35,11 @@ export default defineConfig([
       'react-hooks/refs': 'off',
     },
   },
+  {
+    // Server code (Route Handlers, Server Components) and tests run on Node
+    files: ['src/app/**/*.{js,jsx}', 'src/lib/stats.js', 'src/test/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: { process: 'readonly' },
+    },
+  },
 ])
